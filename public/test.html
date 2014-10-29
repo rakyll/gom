@@ -4,7 +4,8 @@
   <title></title>
   <link rel="stylesheet" href="//cdn.jsdelivr.net/flat-ui/2.0/css/flat-ui.css">
   <style>
-    .inline{display:inline}
+    @import ur(//cdn.jsdelivr.net/flat-ui/2.0/fonts/Flat-UI-Icons.dev.svg);
+    .right{float:right}
     .filter{width:100%}
     .container{ width: 800px; margin: 50px auto;}
   </style>
@@ -15,9 +16,12 @@
     </div>
     <div class="row">
         <h3>Profiles</h3>
+        <span class="fui-alert-circle"></span>
         <p>
-        <button type="button" class="cpu btn btn-primary">CPU</button>
-        <button type="button" class="heap btn btn-primary">Heap</button>
+        <span class="fui-repeat"></span>
+          <button type="button" class="cpu btn btn-primary">CPU</button>
+          <button type="button" class="heap btn btn-primary">Heap</button>
+          <button type="button" class="refresh btn right">Refresh</button>
         </p>
         <input type="text" class="filter" placeholder="Focus by keyword...">
         <div class="row"><pre class="results"></pre></div>
@@ -35,10 +39,14 @@
       profile = "heap";
       refresh();
     });
+    $(".refresh").on("click", function() {
+      refresh(true);
+    });
     function refresh(force) {
       $('.results').html('Loading, be patient... CPU profile takes 30 seconds.')
       var f = $('.filter').val();
-      $.get('/p?profile=' + profile + '&filter=' + f, function(data) {
+      var url = '/p?profile=' + profile + '&filter=' + f + '&force=' + !!force;
+      $.get(url, function(data) {
         $('.results').html(data);
       });
     };
