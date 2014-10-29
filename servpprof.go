@@ -97,23 +97,28 @@ func main() {
 		}
 		rpt, ok := reports[p]
 		if !ok {
-			w.WriteHeader(500)
+			w.WriteHeader(404)
 			fmt.Fprintf(w, "Profile not found.")
 			return
 		}
 		if !rpt.Inited() || r.FormValue("force") == "true" {
 			if err := rpt.Fetch(); err != nil {
-				w.WriteHeader(500)
+				w.WriteHeader(400)
 				fmt.Fprintf(w, "%v", err)
 				return
 			}
 		}
 		if filter == "" {
 			fmt.Fprint(w, rpt.All(true))
-		} else {
-			re := regexp.MustCompile("\\.*" + filter + "\\.*")
-			fmt.Fprint(w, rpt.Filter(true, re))
+			return
 		}
+		re, err := regexp.Compile(filter)
+		if err != nil {
+			w.WriteHeader(400)
+			fmt.Fprintf(w, "%v", err)
+			return
+		}
+		fmt.Fprint(w, rpt.Filter(true, re))
 	})
 
 	statikFS, err := fs.New()

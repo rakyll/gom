@@ -49,8 +49,13 @@
       // TODO: cancel the existing request if it's not ciompleted.
       $('.results').html('Loading, be patient... CPU profile takes 30 seconds.');
       var f = $('.filter').val();
-      var url = '/p?profile=' + profile + '&filter=' + f + '&force=' + !!force;
-      $.get(url, function(data) {
+      $.get('/p', {
+        profile: profile,
+        filter: f,
+        force: !!force
+      }).done(function(data) {
+        $('.results').html(data);
+      }).fail(function(data) {
         $('.results').html(data);
       });
     };
