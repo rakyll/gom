@@ -14,32 +14,31 @@
     <div class="row">
     </div>
     <div class="row">
-        <p>
         <h3>Profiles</h3>
+        <p>
         <button type="button" class="cpu btn btn-primary">CPU</button>
         <button type="button" class="heap btn btn-primary">Heap</button>
-        <label class="checkbox" for="cumsort">
-            <input type="checkbox" checked="checked" id="cumsort">
-            Cumulative sort
-        </label>
         </p>
-        <input type="text" class="filter" placeholder="Filter by regex...">
+        <input type="text" class="filter" placeholder="Focus by keyword...">
         <div class="row"><pre class="results"></pre></div>
       </div>
   </div>
   <script src="//ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
   <script type="text/javascript">
-    get("heap");
+    var profile = "heap";
+    refresh();
     $(".cpu").on("click", function() {
-      get("profile");
+      profile = "profile";
+      refresh();
     });
     $(".heap").on("click", function() {
-      get("heap");
+      profile = "heap";
+      refresh();
     });
-    function get(name) {
-      $('.results').html('Loading, be patient...')
+    function refresh(force) {
+      $('.results').html('Loading, be patient... CPU profile takes 30 seconds.')
       var f = $('.filter').val();
-      $.get('/p?profile=' + name + '&filter=' + f, function(data) {
+      $.get('/p?profile=' + profile + '&filter=' + f, function(data) {
         $('.results').html(data);
       });
     };

@@ -37,6 +37,10 @@ type Report struct {
 	secs int
 }
 
+func (r *Report) Inited() bool {
+	return r.p != nil
+}
+
 func (r *Report) Fetch() error {
 	r.mu.Lock()
 	defer r.mu.Unlock()
@@ -87,21 +91,28 @@ func (r *Report) Filter(cum bool, focus *regexp.Regexp) string {
 func main() {
 	http.HandleFunc("/p", func(w http.ResponseWriter, r *http.Request) {
 		p := r.FormValue("profile")
-		f := r.FormValue("filter")
+		filter := r.FormValue("filter")
+		force := r.FormValue("force")
 		if p == "" {
 			p = "heap"
 		}
-		rpt := reports[p]
-		err := rpt.Fetch()
-		if err != nil {
+		rpt, ok := reports[p]
+		if !ok {
 			w.WriteHeader(500)
-			fmt.Fprintf(w, "%v", err)
+			fmt.Fprintf(w, "Profile not found.")
 			return
 		}
-		if f == "" {
+		if !rpt.Inited() || force != "" {
+			if err := rpt.Fetch(); err != nil {
+				w.WriteHeader(500)
+				fmt.Fprintf(w, "%v", err)
+				return
+			}
+		}
+		if filter == "" {
 			fmt.Fprint(w, rpt.All(true))
 		} else {
-			re := regexp.MustCompile("\\.*" + f + "\\.*")
+			re := regexp.MustCompile("\\.*" + filter + "\\.*")
 			fmt.Fprint(w, rpt.Filter(true, re))
 		}
 	})
