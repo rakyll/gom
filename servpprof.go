@@ -92,7 +92,6 @@ func main() {
 	http.HandleFunc("/p", func(w http.ResponseWriter, r *http.Request) {
 		p := r.FormValue("profile")
 		filter := r.FormValue("filter")
-		force := r.FormValue("force")
 		if p == "" {
 			p = "heap"
 		}
@@ -102,7 +101,7 @@ func main() {
 			fmt.Fprintf(w, "Profile not found.")
 			return
 		}
-		if !rpt.Inited() || force != "" {
+		if !rpt.Inited() || r.FormValue("force") == "true" {
 			if err := rpt.Fetch(); err != nil {
 				w.WriteHeader(500)
 				fmt.Fprintf(w, "%v", err)

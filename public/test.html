@@ -42,6 +42,9 @@
     $(".refresh").on("click", function() {
       refresh(true);
     });
+    $(".filter").on("keyup", function() {
+      refresh();
+    });
     function refresh(force) {
       $('.results').html('Loading, be patient... CPU profile takes 30 seconds.')
       var f = $('.filter').val();
