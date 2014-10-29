@@ -1,0 +1,48 @@
+<!doctype html>
+<html>
+<head>
+  <title></title>
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/flat-ui/2.0/css/flat-ui.css">
+  <style>
+    .inline{display:inline}
+    .filter{width:100%}
+    .container{ width: 800px; margin: 50px auto;}
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="row">
+    </div>
+    <div class="row">
+        <p>
+        <h3>Profiles</h3>
+        <button type="button" class="cpu btn btn-primary">CPU</button>
+        <button type="button" class="heap btn btn-primary">Heap</button>
+        <label class="checkbox" for="cumsort">
+            <input type="checkbox" checked="checked" id="cumsort">
+            Cumulative sort
+        </label>
+        </p>
+        <input type="text" class="filter" placeholder="Filter by regex...">
+        <div class="row"><pre class="results"></pre></div>
+      </div>
+  </div>
+  <script src="//ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+  <script type="text/javascript">
+    get("heap");
+    $(".cpu").on("click", function() {
+      get("profile");
+    });
+    $(".heap").on("click", function() {
+      get("heap");
+    });
+    function get(name) {
+      $('.results').html('Loading, be patient...')
+      var f = $('.filter').val();
+      $.get('/p?profile=' + name + '&filter=' + f, function(data) {
+        $('.results').html(data);
+      });
+    };
+  </script>
+</body>
+</html>

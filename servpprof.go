@@ -8,13 +8,15 @@ import (
 	"net/http"
 	"regexp"
 	"sync"
-	"text/template"
 	"time"
 
 	"github.com/rakyll/servpprof/pprof/internal/fetch"
 	"github.com/rakyll/servpprof/pprof/internal/profile"
 	"github.com/rakyll/servpprof/pprof/internal/report"
 	"github.com/rakyll/servpprof/pprof/internal/symbolz"
+	"github.com/rakyll/statik/fs"
+
+	_ "github.com/rakyll/servpprof/statik"
 )
 
 var (
@@ -103,9 +105,12 @@ func main() {
 			fmt.Fprint(w, rpt.Filter(true, re))
 		}
 	})
-	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		template.Must(template.New("home").Parse(home)).Execute(w, nil)
-	})
+
+	statikFS, err := fs.New()
+	if err != nil {
+		log.Fatal(err)
+	}
+	http.Handle("/", http.FileServer(statikFS))
 	log.Fatal(http.ListenAndServe(*listen, nil))
 }
 
@@ -113,55 +118,3 @@ func init() {
 	reports["profile"] = &Report{name: "profile", secs: 30}
 	reports["heap"] = &Report{name: "heap"}
 }
-
-var home = `<!doctype html>
-<html>
-<head>
-  <title></title>
-  <link rel="stylesheet" href="//cdn.jsdelivr.net/flat-ui/2.0/css/flat-ui.css">
-  <style>
-  	body {
-
-  	}
-  	.inline{display:inline}
-  	.filter{width:100%}
-  	.container{ width: 800px; margin: 50px auto;}
-  </style>
-</head>
-<body>
-	<div class="container">
-	  <div class="row">
-	  </div>
-	  <div class="row">
-    		<p>
-    		<h3>Profiles</h3>
-    		<button type="button" class="cpu btn btn-primary">CPU</button>
-    		<button type="button" class="heap btn btn-primary">Heap</button>
-				<label class="checkbox" for="cumsort">
-            <input type="checkbox" checked="checked" id="cumsort">
-            Cumulative sort
-        </label>
-    		</p>
-    		<input type="text" class="filter" placeholder="Filter by regex...">
-    		<div class="row"><pre class="results"></pre></div>
-    	</div>
-	</div>
-	<script src="//ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
-	<script type="text/javascript">
-		get("heap");
-		$(".cpu").on("click", function() {
-			get("profile");
-		});
-		$(".heap").on("click", function() {
-			get("heap");
-		});
-		function get(name) {
-			$('.results').html('Loading, be patient...')
-			var f = $('.filter').val();
-			$.get('/p?profile=' + name + '&filter=' + f, function(data) {
-				$('.results').html(data);
-			});
-		};
-	</script>
-</body>
-</html>`
