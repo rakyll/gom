@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"regexp"
 	"sync"
 	"text/template"
 	"time"
@@ -50,14 +51,13 @@ func (r *Report) Fetch() error {
 	return nil
 }
 
-func (r *Report) String(cum bool) string {
+func (r *Report) All(cum bool) string {
 	if r.p == nil {
 		return ""
 	}
 	buf := bytes.NewBuffer(nil)
 	rpt := report.NewDefault(r.p, report.Options{
 		OutputFormat:   report.Text,
-		CallTree:       true,
 		CumSort:        cum,
 		PrintAddresses: true,
 	})
@@ -65,16 +65,16 @@ func (r *Report) String(cum bool) string {
 	return buf.String()
 }
 
-func (r *Report) Filter(cum bool, focus string) string {
+func (r *Report) Filter(cum bool, focus *regexp.Regexp) string {
+	// TODO(jbd): Support ignore and hide.
 	if r.p == nil {
 		return ""
 	}
 	c := r.p.Copy()
-	c.FilterSamplesByName(nil, nil, nil)
+	c.FilterSamplesByName(focus, nil, nil)
 	buf := bytes.NewBuffer(nil)
 	rpt := report.NewDefault(c, report.Options{
 		OutputFormat:   report.Text,
-		CallTree:       true,
 		CumSort:        cum,
 		PrintAddresses: true,
 	})
@@ -85,6 +85,7 @@ func (r *Report) Filter(cum bool, focus string) string {
 func main() {
 	http.HandleFunc("/p", func(w http.ResponseWriter, r *http.Request) {
 		p := r.FormValue("profile")
+		f := r.FormValue("filter")
 		if p == "" {
 			p = "heap"
 		}
@@ -95,7 +96,12 @@ func main() {
 			fmt.Fprintf(w, "%v", err)
 			return
 		}
-		fmt.Fprint(w, rpt.String(true))
+		if f == "" {
+			fmt.Fprint(w, rpt.All(true))
+		} else {
+			re := regexp.MustCompile("\\.*" + f + "\\.*")
+			fmt.Fprint(w, rpt.Filter(true, re))
+		}
 	})
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		template.Must(template.New("home").Parse(home)).Execute(w, nil)
@@ -131,6 +137,10 @@ var home = `<!doctype html>
     		<h3>Profiles</h3>
     		<button type="button" class="cpu btn btn-primary">CPU</button>
     		<button type="button" class="heap btn btn-primary">Heap</button>
+				<label class="checkbox" for="cumsort">
+            <input type="checkbox" checked="checked" id="cumsort">
+            Cumulative sort
+        </label>
     		</p>
     		<input type="text" class="filter" placeholder="Filter by regex...">
     		<div class="row"><pre class="results"></pre></div>
@@ -147,7 +157,8 @@ var home = `<!doctype html>
 		});
 		function get(name) {
 			$('.results').html('Loading, be patient...')
-			$.get('/p?profile=' + name, function(data) {
+			var f = $('.filter').val();
+			$.get('/p?profile=' + name + '&filter=' + f, function(data) {
 				$('.results').html(data);
 			});
 		};
