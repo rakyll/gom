@@ -104,6 +104,7 @@ func main() {
 			fmt.Fprintf(w, "%v", err)
 			return
 		}
+		w.Header().Set("Content-Type", "application/json")
 		fmt.Fprintf(w, "%s", all)
 	})
 
