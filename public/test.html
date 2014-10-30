@@ -5,15 +5,17 @@
   <link rel="stylesheet" href="//cdn.jsdelivr.net/flat-ui/2.0/css/flat-ui.css">
   <style>
     @import ur(//cdn.jsdelivr.net/flat-ui/2.0/fonts/Flat-UI-Icons.dev.svg);
+    .chart{margin: 20px 0px;}
+    .btn {padding: 2px 13px;}
     .right{float:right}
     .filter{width:100%}
     .container{ width: 800px; margin: 50px auto;}
   </style>
 </head>
 <body>
+<a href="https://github.com/you"><img style="position: absolute; top: 0; right: 0; border: 0;" src="https://camo.githubusercontent.com/a6677b08c955af8400f44c6298f40e7d19cc5b2d/68747470733a2f2f73332e616d617a6f6e6177732e636f6d2f6769746875622f726962626f6e732f666f726b6d655f72696768745f677261795f3664366436642e706e67" alt="Fork me on GitHub" data-canonical-src="https://s3.amazonaws.com/github/ribbons/forkme_right_gray_6d6d6d.png"></a>
   <div class="container">
-    <div class="row">
-    </div>
+    <div id="tgchart" class="chart"></div>
     <div class="row">
         <h3>Profiles</h3>
         <span class="fui-alert-circle"></span>
@@ -23,42 +25,12 @@
           <button type="button" class="heap btn btn-primary">Heap</button>
           <button type="button" class="refresh btn right">Refresh</button>
         </p>
-        <input type="text" class="filter" placeholder="Focus by keyword...">
+        <input type="text" class="filter" placeholder="Focus by regex... You can filter by package, type or function name.">
         <div class="row"><pre class="results"></pre></div>
       </div>
   </div>
   <script src="//ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
-  <script type="text/javascript">
-    var profile = "heap";
-    refresh();
-    $(".cpu").on("click", function() {
-      profile = "profile";
-      refresh();
-    });
-    $(".heap").on("click", function() {
-      profile = "heap";
-      refresh();
-    });
-    $(".refresh").on("click", function() {
-      refresh(true);
-    });
-    $(".filter").on("keyup", function() {
-      refresh();
-    });
-    function refresh(force) {
-      // TODO: cancel the existing request if it's not ciompleted.
-      $('.results').html('Loading, be patient... CPU profile takes 30 seconds.');
-      var f = $('.filter').val();
-      $.get('/p', {
-        profile: profile,
-        filter: f,
-        force: !!force
-      }).done(function(data) {
-        $('.results').html(data);
-      }).fail(function(data) {
-        $('.results').html(data);
-      });
-    };
-  </script>
+  <script src="//cdnjs.cloudflare.com/ajax/libs/jquery-sparklines/2.1.2/jquery.sparkline.min.js"></script>
+  <script type="text/javascript" src="/app.js"></script>
 </body>
 </html>

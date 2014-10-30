@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"flag"
 	"fmt"
+	"io/ioutil"
 	"log"
 	"net/http"
 	"regexp"
@@ -89,12 +90,26 @@ func (r *Report) Filter(cum bool, focus *regexp.Regexp) string {
 }
 
 func main() {
+	http.HandleFunc("/stats", func(w http.ResponseWriter, r *http.Request) {
+		url := fmt.Sprintf("%s/debug/pprofstats", *dest)
+		resp, err := http.Get(url)
+		if err != nil {
+			w.WriteHeader(500)
+			fmt.Fprintf(w, "%v", err)
+			return
+		}
+		all, err := ioutil.ReadAll(resp.Body)
+		if err != nil {
+			w.WriteHeader(500)
+			fmt.Fprintf(w, "%v", err)
+			return
+		}
+		fmt.Fprintf(w, "%s", all)
+	})
+
 	http.HandleFunc("/p", func(w http.ResponseWriter, r *http.Request) {
 		p := r.FormValue("profile")
 		filter := r.FormValue("filter")
-		if p == "" {
-			p = "heap"
-		}
 		rpt, ok := reports[p]
 		if !ok {
 			w.WriteHeader(404)
@@ -130,6 +145,9 @@ func main() {
 }
 
 func init() {
+	// TODO(jbd): Support user profiles.
 	reports["profile"] = &Report{name: "profile", secs: 30}
 	reports["heap"] = &Report{name: "heap"}
+	reports["goroutine"] = &Report{name: "goroutine"}
+	reports["threadcreate"] = &Report{name: "threadcreate"}
 }
