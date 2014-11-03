@@ -61,6 +61,6 @@ function drawCharts() {
     barSpacing: 2,
     barColor: '#1ABC9C',
     barWidth: 5,
-    stackedBarColor: ['#16A085', '#1ABC9C', '#7F8C8D'],
+    stackedBarColor: ['#1ABC9C', '#16A085', '#7F8C8D'],
   });
 }
