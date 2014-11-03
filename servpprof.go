@@ -34,19 +34,22 @@ type Report struct {
 	mu sync.Mutex
 	p  *profile.Profile
 
-	name string
-	secs int
+	name        string
+	defaultSecs int
 }
 
 func (r *Report) Inited() bool {
 	return r.p != nil
 }
 
-func (r *Report) Fetch() error {
+func (r *Report) Fetch(secs int) error {
 	r.mu.Lock()
 	defer r.mu.Unlock()
+	if secs == 0 {
+		secs = r.defaultSecs
+	}
 	// TODO(jbd): Set timeout according to the seonds parameter.
-	url := fmt.Sprintf("%s/debug/pprof/%s?seconds=%d", *dest, r.name, r.secs)
+	url := fmt.Sprintf("%s/debug/pprof/%s?seconds=%d", *dest, r.name, secs)
 	p, err := fetch.FetchProfile(url, 60*time.Second)
 	if err != nil {
 		return err
@@ -118,7 +121,7 @@ func main() {
 			return
 		}
 		if !rpt.Inited() || r.FormValue("force") == "true" {
-			if err := rpt.Fetch(); err != nil {
+			if err := rpt.Fetch(0); err != nil {
 				w.WriteHeader(400)
 				fmt.Fprintf(w, "%v", err)
 				return
@@ -147,7 +150,7 @@ func main() {
 
 func init() {
 	// TODO(jbd): Support user profiles.
-	reports["profile"] = &Report{name: "profile", secs: 30}
+	reports["profile"] = &Report{name: "profile", defaultSecs: 30}
 	reports["heap"] = &Report{name: "heap"}
 	reports["goroutine"] = &Report{name: "goroutine"}
 	reports["threadcreate"] = &Report{name: "threadcreate"}
