@@ -141,6 +141,8 @@ func main() {
 		log.Fatal(err)
 	}
 	http.Handle("/", http.FileServer(statikFS))
+
+	log.Printf("Point your browser to http://%s", *listen)
 	log.Fatal(http.ListenAndServe(*listen, nil))
 }
 
