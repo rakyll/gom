@@ -42,6 +42,7 @@ func (r *Report) Inited() bool {
 	return r.p != nil
 }
 
+// Fetch fetches the current profile and the symbols from the target program.
 func (r *Report) Fetch(secs int) error {
 	r.mu.Lock()
 	defer r.mu.Unlock()
@@ -61,22 +62,12 @@ func (r *Report) Fetch(secs int) error {
 	return nil
 }
 
-func (r *Report) All(cum bool) string {
-	if r.p == nil {
-		return ""
-	}
-	buf := bytes.NewBuffer(nil)
-	rpt := report.NewDefault(r.p, report.Options{
-		OutputFormat:   report.Text,
-		CumSort:        cum,
-		PrintAddresses: true,
-	})
-	report.Generate(buf, rpt, nil)
-	return buf.String()
-}
-
+// Filter filters the report with a focus regex. If no focus is provided,
+// it reports back with the entire set of calls.
+// Focus regex works on the package, type and function names. Filtered
+// results will include parent samples from the call graph.
 func (r *Report) Filter(cum bool, focus *regexp.Regexp) string {
-	// TODO(jbd): Support ignore and hide.
+	// TODO(jbd): Support ignore and hide regex parameters.
 	if r.p == nil {
 		return ""
 	}
@@ -89,10 +80,14 @@ func (r *Report) Filter(cum bool, focus *regexp.Regexp) string {
 		PrintAddresses: true,
 	})
 	report.Generate(buf, rpt, nil)
+	// TODO(jbd): Write to a io.Writer instead.
 	return buf.String()
 }
 
 func main() {
+	// stats is a proxifying target/debug/pprofstats.
+	// TODO(jbd): If the UI frontend knows about the target, we
+	// might have eliminated the proxy handler.
 	http.HandleFunc("/stats", func(w http.ResponseWriter, r *http.Request) {
 		url := fmt.Sprintf("%s/debug/pprofstats", *dest)
 		resp, err := http.Get(url)
@@ -101,6 +96,7 @@ func main() {
 			fmt.Fprintf(w, "%v", err)
 			return
 		}
+		defer resp.Body.Close()
 		all, err := ioutil.ReadAll(resp.Body)
 		if err != nil {
 			w.WriteHeader(500)
@@ -128,7 +124,7 @@ func main() {
 			}
 		}
 		if filter == "" {
-			fmt.Fprint(w, rpt.All(true))
+			fmt.Fprint(w, rpt.Filter(true, nil))
 			return
 		}
 		re, err := regexp.Compile(filter)
