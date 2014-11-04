@@ -3,7 +3,11 @@
 (function(){
   var profile = "heap";
   var cumsort = true;
-  var data = { gt: [] };
+  var data = {
+    max: 0,
+    goroutine: [],
+    thread: []
+  };
 
   refresh();
 
@@ -28,14 +32,8 @@
 
   var moreStats = function() {
     $.ajax('/stats').done(function(d) {
-      data.gt.pop();
-      if (data.gt.length > 115) {
-        data.gt.shift();
-      }
-      data.gt.push([d.goroutine, d.thread, d.block]);
-      // Add zeros, because sparkline draws the chart relatively,
-      // depending on the min-max range of the dataset.
-      data.gt.push([0, 0, 0]);
+      appendChartData(data.goroutine, d.goroutine);
+      appendChartData(data.thread, d.thread);
       drawCharts();
       setTimeout(function() {
         moreStats();
@@ -70,14 +68,33 @@
     });
   };
 
-  function drawCharts() {
-    $("#tgchart").sparkline(data.gt, {
-      type: 'bar',
-      height: '40px',
-      barSpacing: 2,
-      barColor: '#1ABC9C',
-      barWidth: 5,
-      stackedBarColor: ['#1ABC9C', '#16A085', '#7F8C8D'],
-    });
+  function appendChartData(target, val) {
+    if (val > data.max) {
+      data.max = val;
+    }
+    target.pop();
+    if (target.length > 115) {
+      target.shift();
+    }
+    target.push(val);
+    // Add zeros, because sparkline draws the chart relatively,
+    // depending on the min-max range of the dataset.
+    target.push(0);
   }
-})();
+
+  function drawCharts() {
+    var opts = {
+      type: 'line',
+      height: '40px',
+      lineColor: '#1ABC9C',
+      lineWidth: 2,
+      fillColor: '#e5e5e5',
+      spotColor: '#1ABC9C',
+      minSpotColor: '#1ABC9C',
+      maxSpotColor: '#1ABC9C',
+      chartRangeMax: data.max
+    };
+    $("#gorotinechart").sparkline(data.goroutine, opts);
+    $("#threadchart").sparkline(data.thread, opts);
+  }
+})()
