@@ -37,7 +37,7 @@
       drawCharts();
       setTimeout(function() {
         moreStats();
-      }, 1000);
+      }, 500);
     });
   };
 
@@ -73,7 +73,7 @@
       data.max = val;
     }
     target.pop();
-    if (target.length > 115) {
+    if (target.length > 270) {
       target.shift();
     }
     target.push(val);
