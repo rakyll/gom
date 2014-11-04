@@ -1,6 +1,7 @@
 'use strict';
 
 var profile = "heap";
+var cumsort = true;
 var data = { gt: [] };
 
 refresh();
@@ -17,6 +18,10 @@ $(".refresh").on("click", function() {
   refresh(true);
 });
 $(".filter").on("keyup", function() {
+  refresh();
+});
+$('#cumsort').on('change', function() {
+  cumsort = $(this).is(':checked');
   refresh();
 });
 
@@ -43,7 +48,8 @@ function refresh(force) {
   // TODO: cancel the existing request if it's not ciompleted.
   $('.results').html('Loading, be patient... CPU profile takes 30 seconds.');
   var f = $('.filter').val();
-  $.get('/p', { profile: profile, filter: f, force: !!force }).done(function(items) {
+  $.get('/p', { profile: profile, filter: f, cumsort: cumsort, force: !!force })
+      .done(function(items) {
     var html = '';
     for (var i=0; i<items.length; i++) {
       var item = items[i];

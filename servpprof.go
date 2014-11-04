@@ -8,6 +8,7 @@ import (
 	"log"
 	"net/http"
 	"regexp"
+	"strconv"
 	"sync"
 	"time"
 
@@ -111,15 +112,18 @@ func main() {
 
 	// p responds back with a profile report.
 	http.HandleFunc("/p", func(w http.ResponseWriter, r *http.Request) {
-		p := r.FormValue("profile")
+		profile := r.FormValue("profile")
 		filter := r.FormValue("filter")
-		rpt, ok := reports[p]
+		cumsort, _ := strconv.ParseBool(r.FormValue("cumsort"))
+		force, _ := strconv.ParseBool(r.FormValue("force"))
+
+		rpt, ok := reports[profile]
 		if !ok {
 			w.WriteHeader(404)
 			fmt.Fprintf(w, "Profile not found.")
 			return
 		}
-		if !rpt.Inited() || r.FormValue("force") == "true" {
+		if !rpt.Inited() || force {
 			if err := rpt.Fetch(0); err != nil {
 				w.WriteHeader(500)
 				fmt.Fprintf(w, "%v", err)
@@ -137,7 +141,7 @@ func main() {
 			return
 		}
 		w.Header().Set("Content-Type", "application/json")
-		rpt.Filter(w, true, re)
+		rpt.Filter(w, cumsort, re)
 	})
 
 	statikFS, err := fs.New()

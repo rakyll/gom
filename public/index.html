@@ -14,7 +14,8 @@
     .results table { width: 8000px; }
     .results td.num {text-align: right; width: 50px;}
     .results .bar { width: 100px; }
-    .results .bar div { background: #BDC3C7; height: 12px; }
+    .results .bar div { background: #BDC3C7; height: 12px; border-radius: 5px; }
+    #cumsort { width: 20px; }
   </style>
 </head>
 <body>
@@ -27,6 +28,7 @@
         <span class="fui-repeat"></span>
           <button type="button" class="cpu btn btn-primary">CPU</button>
           <button type="button" class="heap btn btn-primary">Heap</button>
+          <input checked="checked" id="cumsort" class="checkbox" type="checkbox">Cumulative sort
           <button type="button" class="refresh btn right">Refresh</button>
         </p>
         <input type="text" class="filter" placeholder="Focus by regex... You can filter by package, type or function name.">
