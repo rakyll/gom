@@ -22,11 +22,13 @@ $(".filter").on("keyup", function() {
 
 var moreStats = function() {
   $.ajax('/stats').done(function(d) {
-    data.gt.pop(); // Remove the trailing 0.
+    data.gt.pop();
     if (data.gt.length > 115) {
       data.gt.shift();
     }
     data.gt.push([d.goroutine, d.thread, d.block]);
+    // Add zeros, because sparkline draws the chart relatively,
+    // depending on the min-max range of the dataset.
     data.gt.push([0, 0, 0]);
     drawCharts();
     setTimeout(function() {
