@@ -18,7 +18,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/rakyll/servpprof/pprof/internal/plugin"
+	"github.com/rakyll/pitch/pprof/internal/plugin"
 )
 
 // printSource prints an annotated source listing, include all

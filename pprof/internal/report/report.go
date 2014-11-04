@@ -19,8 +19,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/rakyll/servpprof/pprof/internal/plugin"
-	"github.com/rakyll/servpprof/pprof/internal/profile"
+	"github.com/rakyll/pitch/pprof/internal/plugin"
+	"github.com/rakyll/pitch/pprof/internal/profile"
 )
 
 // Generate generates a report as directed by the Report.

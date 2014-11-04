@@ -15,7 +15,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/rakyll/servpprof/pprof/internal/profile"
+	"github.com/rakyll/pitch/pprof/internal/profile"
 )
 
 var (

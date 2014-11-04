@@ -12,13 +12,13 @@ import (
 	"sync"
 	"time"
 
-	"github.com/rakyll/servpprof/pprof/internal/fetch"
-	"github.com/rakyll/servpprof/pprof/internal/profile"
-	"github.com/rakyll/servpprof/pprof/internal/report"
-	"github.com/rakyll/servpprof/pprof/internal/symbolz"
+	"github.com/rakyll/pitch/pprof/internal/fetch"
+	"github.com/rakyll/pitch/pprof/internal/profile"
+	"github.com/rakyll/pitch/pprof/internal/report"
+	"github.com/rakyll/pitch/pprof/internal/symbolz"
 	"github.com/rakyll/statik/fs"
 
-	_ "github.com/rakyll/servpprof/statik"
+	_ "github.com/rakyll/pitch/statik"
 )
 
 var (
