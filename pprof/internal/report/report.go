@@ -352,12 +352,13 @@ func printText(w io.Writer, rpt *Report) error {
 }
 
 type reportEl struct {
-	Name           string `json:"name"`
-	Flat           string `json:"flat"`
-	FlatPercent    string `json:"flat_perc"`
-	FlatSumPercent string `json:"flatsum_perc"`
-	Cum            string `json:"cum"`
-	CumPercent     string `json:"cum_perc"`
+	Name           string  `json:"name"`
+	Flat           string  `json:"flat"`
+	FlatPercent    string  `json:"flat_perc"`
+	FlatSumPercent string  `json:"flatsum_perc"`
+	Cum            string  `json:"cum"`
+	CumPercent     string  `json:"cum_perc"`
+	Score          float64 `json:"score"`
 }
 
 func printJSON(w io.Writer, rpt *Report) error {
@@ -378,6 +379,13 @@ func printJSON(w io.Writer, rpt *Report) error {
 			FlatSumPercent: percentage(flatSum, rpt.total),
 			Cum:            rpt.formatValue(cum),
 			CumPercent:     percentage(cum, rpt.total),
+		}
+		if rpt.total > 0 {
+			if rpt.options.CumSort {
+				l[i].Score = float64(cum) / float64(rpt.total)
+			} else {
+				l[i].Score = float64(flat) / float64(rpt.total)
+			}
 		}
 	}
 	return json.NewEncoder(w).Encode(l)

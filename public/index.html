@@ -10,7 +10,9 @@
     .right{float:right}
     .filter{width:100%}
     .container{ width: 800px; margin: 50px auto;}
-    .results .num {text-align: right;}
+    .results { margin: 20px 0px; }
+    .results table { width: 8000px; font-family: monospace; }
+    .results td.num {text-align: right; width: 50px;}
   </style>
 </head>
 <body>
@@ -26,7 +28,7 @@
           <button type="button" class="refresh btn right">Refresh</button>
         </p>
         <input type="text" class="filter" placeholder="Focus by regex... You can filter by package, type or function name.">
-        <div class="row"><pre class="results"></pre></div>
+        <div class="row"><div class="results"></div></div>
       </div>
   </div>
   <!-- TODO(jbd): Add the remote resources to the public folder,
