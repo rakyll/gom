@@ -1,9 +1,7 @@
 'use strict';
 
 var profile = "heap";
-var data = {
-  gt: []
-};
+var data = { gt: [] };
 
 refresh();
 
@@ -43,12 +41,20 @@ function refresh(force) {
   // TODO: cancel the existing request if it's not ciompleted.
   $('.results').html('Loading, be patient... CPU profile takes 30 seconds.');
   var f = $('.filter').val();
-  $.get('/p', {
-    profile: profile,
-    filter: f,
-    force: !!force
-  }).done(function(data) {
-    $('.results').html(data);
+  $.get('/p', { profile: profile, filter: f, force: !!force }).done(function(items) {
+    var html = '';
+    for (var i=0; i<items.length; i++) {
+      var item = items[i];
+      var row = '';
+      row += '<td>' + item['flat'] + '</td>';
+      row += '<td>' + item['flat_perc'] + '</td>';
+      row += '<td>' + item['flatsum_perc'] + '</td>';
+      row += '<td>' + item['cum'] + '</td>';
+      row += '<td>' + item['cum_perc'] + '</td>';
+      row += '<td>' + item['name'] + '</td>';
+      html += '<tr>' + row + '</tr>';
+    }
+    $(".results").html('<table>' + html + '</table>');
   }).fail(function(data) {
     $('.results').html(data);
   });

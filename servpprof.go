@@ -1,9 +1,9 @@
 package main
 
 import (
-	"bytes"
 	"flag"
 	"fmt"
+	"io"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -66,22 +66,19 @@ func (r *Report) Fetch(secs int) error {
 // it reports back with the entire set of calls.
 // Focus regex works on the package, type and function names. Filtered
 // results will include parent samples from the call graph.
-func (r *Report) Filter(cum bool, focus *regexp.Regexp) string {
+func (r *Report) Filter(w io.Writer, cum bool, focus *regexp.Regexp) {
 	// TODO(jbd): Support ignore and hide regex parameters.
 	if r.p == nil {
-		return ""
+		return
 	}
 	c := r.p.Copy()
 	c.FilterSamplesByName(focus, nil, nil)
-	buf := bytes.NewBuffer(nil)
 	rpt := report.NewDefault(c, report.Options{
-		OutputFormat:   report.Text,
+		OutputFormat:   report.JSON,
 		CumSort:        cum,
 		PrintAddresses: true,
 	})
-	report.Generate(buf, rpt, nil)
-	// TODO(jbd): Write to a io.Writer instead.
-	return buf.String()
+	report.Generate(w, rpt, nil)
 }
 
 func main() {
@@ -112,6 +109,7 @@ func main() {
 		fmt.Fprintf(w, "%s", all)
 	})
 
+	// p responds back with a profile report.
 	http.HandleFunc("/p", func(w http.ResponseWriter, r *http.Request) {
 		p := r.FormValue("profile")
 		filter := r.FormValue("filter")
@@ -123,22 +121,23 @@ func main() {
 		}
 		if !rpt.Inited() || r.FormValue("force") == "true" {
 			if err := rpt.Fetch(0); err != nil {
-				w.WriteHeader(400)
+				w.WriteHeader(500)
 				fmt.Fprintf(w, "%v", err)
 				return
 			}
 		}
-		if filter == "" {
-			fmt.Fprint(w, rpt.Filter(true, nil))
-			return
+		var re *regexp.Regexp
+		var err error
+		if filter != "" {
+			re, err = regexp.Compile(filter)
 		}
-		re, err := regexp.Compile(filter)
 		if err != nil {
 			w.WriteHeader(400)
 			fmt.Fprintf(w, "%v", err)
 			return
 		}
-		fmt.Fprint(w, rpt.Filter(true, re))
+		w.Header().Set("Content-Type", "application/json")
+		rpt.Filter(w, true, re)
 	})
 
 	statikFS, err := fs.New()

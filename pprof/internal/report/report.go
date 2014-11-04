@@ -7,6 +7,7 @@
 package report
 
 import (
+	"encoding/json"
 	"fmt"
 	"io"
 	"math"
@@ -33,6 +34,8 @@ func Generate(w io.Writer, rpt *Report, obj plugin.ObjTool) error {
 		return printTree(w, rpt)
 	case Text:
 		return printText(w, rpt)
+	case JSON:
+		return printJSON(w, rpt)
 	case Raw:
 		fmt.Fprint(w, rpt.prof.String())
 		return nil
@@ -346,6 +349,38 @@ func printText(w io.Writer, rpt *Report) error {
 			name)
 	}
 	return nil
+}
+
+type reportEl struct {
+	Name           string `json:"name"`
+	Flat           string `json:"flat"`
+	FlatPercent    string `json:"flat_perc"`
+	FlatSumPercent string `json:"flatsum_perc"`
+	Cum            string `json:"cum"`
+	CumPercent     string `json:"cum_perc"`
+}
+
+func printJSON(w io.Writer, rpt *Report) error {
+	g, err := newGraph(rpt)
+	if err != nil {
+		return err
+	}
+	g.preprocess(rpt)
+	var flatSum int64
+	var l = make([]*reportEl, len(g.ns))
+	for i, n := range g.ns {
+		name, flat, cum := n.info.prettyName(), n.flat, n.cum
+		flatSum += flat
+		l[i] = &reportEl{
+			Name:           name,
+			Flat:           rpt.formatValue(flat),
+			FlatPercent:    percentage(flat, rpt.total),
+			FlatSumPercent: percentage(flatSum, rpt.total),
+			Cum:            rpt.formatValue(cum),
+			CumPercent:     percentage(cum, rpt.total),
+		}
+	}
+	return json.NewEncoder(w).Encode(l)
 }
 
 // printCallgrind prints a graph for a profile on callgrind format.
@@ -936,6 +971,7 @@ const (
 	List
 	WebList
 	Callgrind
+	JSON
 )
 
 // Options are the formatting and filtering options used to generate a
