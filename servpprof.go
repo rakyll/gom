@@ -158,6 +158,4 @@ func init() {
 	// TODO(jbd): Support user profiles.
 	reports["profile"] = &Report{name: "profile", defaultSecs: 30}
 	reports["heap"] = &Report{name: "heap"}
-	reports["goroutine"] = &Report{name: "goroutine"}
-	reports["threadcreate"] = &Report{name: "threadcreate"}
 }
