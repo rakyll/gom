@@ -2,11 +2,12 @@ package http
 
 import (
 	"encoding/json"
+	"fmt"
+	"net/http"
+	"runtime/pprof"
 	"time"
 
-	"net/http"
 	_ "net/http/pprof"
-	"runtime/pprof"
 )
 
 type stats struct {
@@ -24,6 +25,10 @@ func init() {
 			Block:     pprof.Lookup("block").Count(),
 			Timestamp: time.Now().Unix(),
 		}
-		json.NewEncoder(w).Encode(n)
+		err := json.NewEncoder(w).Encode(n)
+		if err != nil {
+			w.WriteHeader(500)
+			fmt.Fprint(w, err)
+		}
 	})
 }

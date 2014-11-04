@@ -103,6 +103,11 @@ func main() {
 			fmt.Fprintf(w, "%v", err)
 			return
 		}
+		if resp.StatusCode != http.StatusOK {
+			w.WriteHeader(500)
+			fmt.Fprint(w, all)
+			return
+		}
 		w.Header().Set("Content-Type", "application/json")
 		fmt.Fprintf(w, "%s", all)
 	})
