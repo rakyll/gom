@@ -46,11 +46,11 @@ function refresh(force) {
     for (var i=0; i<items.length; i++) {
       var item = items[i];
       var row = '';
-      row += '<td>' + item['flat'] + '</td>';
-      row += '<td>' + item['flat_perc'] + '</td>';
-      row += '<td>' + item['flatsum_perc'] + '</td>';
-      row += '<td>' + item['cum'] + '</td>';
-      row += '<td>' + item['cum_perc'] + '</td>';
+      row += '<td class="num">' + item['flat'] + '</td>';
+      row += '<td class="num">' + item['flat_perc'] + '</td>';
+      row += '<td class="num">' + item['flatsum_perc'] + '</td>';
+      row += '<td class="num">' + item['cum'] + '</td>';
+      row += '<td class="num">' + item['cum_perc'] + '</td>';
       row += '<td>' + item['name'] + '</td>';
       html += '<tr>' + row + '</tr>';
     }
