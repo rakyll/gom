@@ -48,6 +48,7 @@ function refresh(force) {
     for (var i=0; i<items.length; i++) {
       var item = items[i];
       var row = '';
+      row += '<td style="width:100px"><div class="bar" style="width:' + item['score']*100 + 'px"></div></td>'
       row += '<td class="num">' + item['flat'] + '</td>';
       row += '<td class="num">' + item['flat_perc'] + '</td>';
       row += '<td class="num">' + item['flatsum_perc'] + '</td>';
