@@ -1,12 +1,15 @@
 package main
 
 import (
+	"bytes"
+	"errors"
 	"flag"
 	"fmt"
 	"io"
 	"io/ioutil"
 	"log"
 	"net/http"
+	"os/exec"
 	"regexp"
 	"strconv"
 	"sync"
@@ -35,8 +38,8 @@ type Report struct {
 	mu sync.Mutex
 	p  *profile.Profile
 
-	name        string
-	defaultSecs int
+	name string
+	secs int
 }
 
 func (r *Report) Inited() bool {
@@ -48,7 +51,7 @@ func (r *Report) Fetch(secs int) error {
 	r.mu.Lock()
 	defer r.mu.Unlock()
 	if secs == 0 {
-		secs = r.defaultSecs
+		secs = r.secs
 	}
 	// TODO(jbd): Set timeout according to the seonds parameter.
 	url := fmt.Sprintf("%s/debug/pprof/%s?seconds=%d", *dest, r.name, secs)
@@ -82,6 +85,32 @@ func (r *Report) Filter(w io.Writer, cum bool, focus *regexp.Regexp) {
 	report.Generate(w, rpt, nil)
 }
 
+func (r *Report) Draw(w io.Writer, cum bool, focus *regexp.Regexp) error {
+	// TODO(jbd): Support ignore and hide regex parameters.
+	if r.p == nil {
+		return errors.New("no such profile")
+	}
+	c := r.p.Copy()
+	c.FilterSamplesByName(focus, nil, nil)
+	rpt := report.NewDefault(c, report.Options{
+		OutputFormat:   report.Dot,
+		CumSort:        cum,
+		PrintAddresses: true,
+	})
+	data := bytes.NewBuffer(nil)
+	report.Generate(data, rpt, nil)
+	cmd := exec.Command("dot", "-Tpng")
+	in, _ := cmd.StdinPipe()
+	_, err := io.Copy(in, data)
+	if err != nil {
+		return err
+	}
+	in.Close()
+	out, err := cmd.Output()
+	_, err = w.Write(out)
+	return err
+}
+
 func main() {
 	// stats is a proxifying target/debug/pprofstats.
 	// TODO(jbd): If the UI frontend knows about the target, we
@@ -90,6 +119,7 @@ func main() {
 		url := fmt.Sprintf("%s/debug/pprofstats", *dest)
 		resp, err := http.Get(url)
 		if err != nil {
+			log.Print(err)
 			w.WriteHeader(500)
 			fmt.Fprintf(w, "%v", err)
 			return
@@ -103,7 +133,7 @@ func main() {
 		}
 		if resp.StatusCode != http.StatusOK {
 			w.WriteHeader(500)
-			fmt.Fprint(w, all)
+			fmt.Fprintf(w, "%s", all)
 			return
 		}
 		w.Header().Set("Content-Type", "application/json")
@@ -114,6 +144,7 @@ func main() {
 	http.HandleFunc("/p", func(w http.ResponseWriter, r *http.Request) {
 		profile := r.FormValue("profile")
 		filter := r.FormValue("filter")
+		img, _ := strconv.ParseBool(r.FormValue("img"))
 		cumsort, _ := strconv.ParseBool(r.FormValue("cumsort"))
 		force, _ := strconv.ParseBool(r.FormValue("force"))
 
@@ -140,6 +171,11 @@ func main() {
 			fmt.Fprintf(w, "%v", err)
 			return
 		}
+		if img {
+			w.Header().Set("Content-Type", "image/png")
+			rpt.Draw(w, cumsort, re)
+			return
+		}
 		w.Header().Set("Content-Type", "application/json")
 		rpt.Filter(w, cumsort, re)
 	})
@@ -149,13 +185,12 @@ func main() {
 		log.Fatal(err)
 	}
 	http.Handle("/", http.FileServer(statikFS))
-
 	log.Printf("Point your browser to http://%s", *listen)
 	log.Fatal(http.ListenAndServe(*listen, nil))
 }
 
 func init() {
 	// TODO(jbd): Support user profiles.
-	reports["profile"] = &Report{name: "profile", defaultSecs: 30}
+	reports["profile"] = &Report{name: "profile", secs: 30}
 	reports["heap"] = &Report{name: "heap"}
 }
