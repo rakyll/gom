@@ -15,13 +15,13 @@ import (
 	"sync"
 	"time"
 
-	"github.com/rakyll/pitch/pprof/internal/fetch"
-	"github.com/rakyll/pitch/pprof/internal/profile"
-	"github.com/rakyll/pitch/pprof/internal/report"
-	"github.com/rakyll/pitch/pprof/internal/symbolz"
+	"github.com/rakyll/gometry/internal/pprof/fetch"
+	"github.com/rakyll/gometry/internal/pprof/profile"
+	"github.com/rakyll/gometry/internal/pprof/report"
+	"github.com/rakyll/gometry/internal/pprof/symbolz"
 	"github.com/rakyll/statik/fs"
 
-	_ "github.com/rakyll/pitch/statik"
+	_ "github.com/rakyll/gometry/statik"
 )
 
 var (

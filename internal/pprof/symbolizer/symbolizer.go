@@ -13,8 +13,8 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/rakyll/servpprof/pprof/internal/plugin"
-	"github.com/rakyll/servpprof/pprof/internal/profile"
+	"github.com/rakyll/gometry/internal/pprof/plugin"
+	"github.com/rakyll/gometry/internal/pprof/profile"
 )
 
 // Symbolize adds symbol and line number information to all locations

@@ -16,8 +16,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/rakyll/pitch/pprof/internal/plugin"
-	"github.com/rakyll/pitch/pprof/internal/profile"
+	"github.com/rakyll/gometry/internal/pprof/plugin"
+	"github.com/rakyll/gometry/internal/pprof/profile"
 )
 
 // FetchProfile reads from a data source (network, file) and generates a

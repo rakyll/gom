@@ -13,10 +13,10 @@ import (
 	"os/exec"
 	"strings"
 
-	"github.com/rakyll/servpprof/pprof/internal/plugin"
-	"github.com/rakyll/servpprof/pprof/internal/report"
-	"github.com/rakyll/servpprof/pprof/internal/svg"
-	"github.com/rakyll/servpprof/pprof/internal/tempfile"
+	"github.com/rakyll/gometry/internal/pprof/plugin"
+	"github.com/rakyll/gometry/internal/pprof/report"
+	"github.com/rakyll/gometry/internal/pprof/svg"
+	"github.com/rakyll/gometry/internal/pprof/tempfile"
 )
 
 // Commands describes the commands accepted by pprof.
