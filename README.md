@@ -2,7 +2,7 @@
 
 A visual interface to work with runtime profiling data from Go programs.
 
-![gometry screenshot](http://i.imgur.com/Wpm7VJd.png)
+![gometry screenshot](http://i.imgur.com/0xkaSKL.png)
 
 
 ## Installation

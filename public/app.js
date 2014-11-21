@@ -87,12 +87,12 @@
     var opts = {
       type: 'line',
       height: '40px',
-      lineColor: '#BDC3C7',
+      lineColor: '#1ABC9C',
       lineWidth: 1,
-      fillColor: '#BDC3C7',
-      spotColor: '#BDC3C7',
-      minSpotColor: '#BDC3C7',
-      maxSpotColor: '#BDC3C7',
+      fillColor: '#1ABC9C',
+      spotColor: '#1ABC9C',
+      minSpotColor: '#1ABC9C',
+      maxSpotColor: '#1ABC9C',
       chartRangeMax: data.max
     };
     $("#gorotinechart").sparkline(data.goroutine, opts);
