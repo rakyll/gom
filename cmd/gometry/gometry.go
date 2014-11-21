@@ -26,7 +26,7 @@ import (
 
 var (
 	listen = flag.String("listen", "localhost:6464", "the hostname and port the server is listening to")
-	dest   = flag.String("target", "http://localhost:6060", "the target process that enables pprof debug server")
+	target = flag.String("target", "http://localhost:6060", "the target process that enables pprof debug server")
 )
 
 var (
@@ -54,12 +54,12 @@ func (r *Report) Fetch(secs int) error {
 		secs = r.secs
 	}
 	// TODO(jbd): Set timeout according to the seonds parameter.
-	url := fmt.Sprintf("%s/debug/pprof/%s?seconds=%d", *dest, r.name, secs)
+	url := fmt.Sprintf("%s/debug/pprof/%s?seconds=%d", *target, r.name, secs)
 	p, err := fetch.FetchProfile(url, 60*time.Second)
 	if err != nil {
 		return err
 	}
-	if err := symbolz.Symbolize(fmt.Sprintf("%s/debug/pprof/symbol", *dest), fetch.PostURL, p); err != nil {
+	if err := symbolz.Symbolize(fmt.Sprintf("%s/debug/pprof/symbol", *target), fetch.PostURL, p); err != nil {
 		return err
 	}
 	r.p = p
@@ -115,7 +115,7 @@ func main() {
 	// TODO(jbd): If the UI frontend knows about the target, we
 	// might have eliminated the proxy handler.
 	http.HandleFunc("/stats", func(w http.ResponseWriter, r *http.Request) {
-		url := fmt.Sprintf("%s/debug/pprofstats", *dest)
+		url := fmt.Sprintf("%s/debug/pprofstats", *target)
 		resp, err := http.Get(url)
 		if err != nil {
 			log.Print(err)
