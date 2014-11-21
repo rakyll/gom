@@ -93,9 +93,8 @@ func (r *Report) Draw(w io.Writer, cum bool, focus *regexp.Regexp) error {
 	c := r.p.Copy()
 	c.FilterSamplesByName(focus, nil, nil)
 	rpt := report.NewDefault(c, report.Options{
-		OutputFormat:   report.Dot,
-		CumSort:        cum,
-		PrintAddresses: true,
+		OutputFormat: report.Dot,
+		CumSort:      cum,
 	})
 	data := bytes.NewBuffer(nil)
 	report.Generate(data, rpt, nil)

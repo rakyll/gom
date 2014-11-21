@@ -6,7 +6,8 @@
   var data = {
     max: 0,
     goroutine: [],
-    thread: []
+    thread: [],
+    block: [],
   };
 
   refresh();
@@ -73,7 +74,7 @@
       data.max = val;
     }
     target.pop();
-    if (target.length > 270) {
+    if (target.length > 265) {
       target.shift();
     }
     target.push(val);
@@ -86,12 +87,12 @@
     var opts = {
       type: 'line',
       height: '40px',
-      lineColor: '#1ABC9C',
-      lineWidth: 2,
-      fillColor: '#e5e5e5',
-      spotColor: '#1ABC9C',
-      minSpotColor: '#1ABC9C',
-      maxSpotColor: '#1ABC9C',
+      lineColor: '#BDC3C7',
+      lineWidth: 1,
+      fillColor: '#BDC3C7',
+      spotColor: '#BDC3C7',
+      minSpotColor: '#BDC3C7',
+      maxSpotColor: '#BDC3C7',
       chartRangeMax: data.max
     };
     $("#gorotinechart").sparkline(data.goroutine, opts);
