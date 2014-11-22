@@ -22,6 +22,7 @@ import (
 	"io"
 	"io/ioutil"
 	"log"
+	"net"
 	"net/http"
 	"os/exec"
 	"regexp"
@@ -39,7 +40,7 @@ import (
 )
 
 var (
-	listen = flag.String("listen", "localhost:6464", "the hostname and port the server is listening to")
+	listen = flag.String("http", "localhost:6464", "the hostname and port the server is listening to")
 	target = flag.String("target", "http://localhost:6060", "the target process that enables pprof debug server")
 )
 
@@ -125,6 +126,7 @@ func (r *Report) Draw(w io.Writer, cum bool, focus *regexp.Regexp) error {
 }
 
 func main() {
+	flag.Parse()
 	// stats is a proxifying target/debug/pprofstats.
 	// TODO(jbd): If the UI frontend knows about the target, we
 	// might have eliminated the proxy handler.
@@ -198,7 +200,14 @@ func main() {
 		log.Fatal(err)
 	}
 	http.Handle("/", http.FileServer(statikFS))
-	log.Printf("Point your browser to http://%s", *listen)
+	host, port, err := net.SplitHostPort(*listen)
+	if err != nil {
+		log.Fatal(err)
+	}
+	if host == "" {
+		host = "localhost"
+	}
+	log.Printf("Point your browser to http://%s", net.JoinHostPort(host, port))
 	log.Fatal(http.ListenAndServe(*listen, nil))
 }
 
