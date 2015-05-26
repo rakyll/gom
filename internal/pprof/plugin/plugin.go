@@ -13,7 +13,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/rakyll/gometry/internal/pprof/profile"
+	"github.com/rakyll/gom/internal/pprof/profile"
 )
 
 // A FlagSet creates and parses command-line flags.

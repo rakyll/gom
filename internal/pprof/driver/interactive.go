@@ -12,9 +12,9 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/rakyll/gometry/internal/pprof/commands"
-	"github.com/rakyll/gometry/internal/pprof/plugin"
-	"github.com/rakyll/gometry/internal/pprof/profile"
+	"github.com/rakyll/gom/internal/pprof/commands"
+	"github.com/rakyll/gom/internal/pprof/plugin"
+	"github.com/rakyll/gom/internal/pprof/profile"
 )
 
 var profileFunctionNames = []string{}

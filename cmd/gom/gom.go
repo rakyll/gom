@@ -30,13 +30,13 @@ import (
 	"sync"
 	"time"
 
-	"github.com/rakyll/gometry/internal/pprof/fetch"
-	"github.com/rakyll/gometry/internal/pprof/profile"
-	"github.com/rakyll/gometry/internal/pprof/report"
-	"github.com/rakyll/gometry/internal/pprof/symbolz"
+	"github.com/rakyll/gom/internal/pprof/fetch"
+	"github.com/rakyll/gom/internal/pprof/profile"
+	"github.com/rakyll/gom/internal/pprof/report"
+	"github.com/rakyll/gom/internal/pprof/symbolz"
 	"github.com/rakyll/statik/fs"
 
-	_ "github.com/rakyll/gometry/statik"
+	_ "github.com/rakyll/gom/statik"
 )
 
 var (
@@ -113,7 +113,7 @@ func (r *Report) Draw(w io.Writer, cum bool, focus *regexp.Regexp) error {
 	})
 	data := bytes.NewBuffer(nil)
 	report.Generate(data, rpt, nil)
-	cmd := exec.Command("dot", "-Tpng")
+	cmd := exec.Command("dot", "-Tsvg")
 	in, _ := cmd.StdinPipe()
 	_, err := io.Copy(in, data)
 	if err != nil {
@@ -187,7 +187,7 @@ func main() {
 			return
 		}
 		if img {
-			w.Header().Set("Content-Type", "image/png")
+			w.Header().Set("Content-Type", "image/svg+xml")
 			rpt.Draw(w, cumsort, re)
 			return
 		}

@@ -21,11 +21,11 @@ import (
 	"sync"
 	"time"
 
-	"github.com/rakyll/gometry/internal/pprof/commands"
-	"github.com/rakyll/gometry/internal/pprof/plugin"
-	"github.com/rakyll/gometry/internal/pprof/profile"
-	"github.com/rakyll/gometry/internal/pprof/report"
-	"github.com/rakyll/gometry/internal/pprof/tempfile"
+	"github.com/rakyll/gom/internal/pprof/commands"
+	"github.com/rakyll/gom/internal/pprof/plugin"
+	"github.com/rakyll/gom/internal/pprof/profile"
+	"github.com/rakyll/gom/internal/pprof/report"
+	"github.com/rakyll/gom/internal/pprof/tempfile"
 )
 
 // PProf acquires a profile, and symbolizes it using a profile

@@ -18,7 +18,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/rakyll/gometry/internal/pprof/plugin"
+	"github.com/rakyll/gom/internal/pprof/plugin"
 )
 
 // printSource prints an annotated source listing, include all

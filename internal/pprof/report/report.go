@@ -19,8 +19,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/rakyll/gometry/internal/pprof/plugin"
-	"github.com/rakyll/gometry/internal/pprof/profile"
+	"github.com/rakyll/gom/internal/pprof/plugin"
+	"github.com/rakyll/gom/internal/pprof/profile"
 )
 
 // Generate generates a report as directed by the Report.
