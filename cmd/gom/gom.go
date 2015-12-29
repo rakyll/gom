@@ -21,6 +21,14 @@ import (
 	ui "github.com/gizak/termui"
 )
 
+const usage = `- :c to see the current CPU profile
+- :h to see the current heap profile
+- :f to regex filter to focus by symbol name
+- :s to toggle cumulative sort of the results
+- :r to refresh the current profile
+- :p to paginate, e.g. :p=0 to view the first page
+`
+
 var (
 	p      = flag.String("p", "cpu", "name of the profile: cpu or heap")
 	target = flag.String("target", "http://localhost:6060", "the target process to profile; it has to enable pprof debug server")
@@ -60,26 +68,33 @@ func draw() {
 		return ps
 	})()
 
-	p := ui.NewPar(`usage: ":cpu" for cpu, ":heap" for heap profile; ":c" to sort cumulatively `)
-	p.Height = 3
-	p.Width = 60
+	p := ui.NewPar(usage)
+	p.Height = 8
 	p.BorderLabel = " gom - visual runtime profiler "
 	p.TextFgColor = ui.ColorWhite
 	p.BorderFg = ui.ColorCyan
 
-	spark := ui.Sparkline{}
-	spark.Height = 11
-	spark.Data = data
-	spark.LineColor = ui.ColorCyan
+	prompt := ui.NewPar(` >_ `)
+	prompt.Height = 2
+	prompt.Border = false
 
-	sp := ui.NewSparklines(spark)
-	sp.Height = 13
+	goroutines := ui.Sparkline{}
+	goroutines.Title = "goroutines"
+	goroutines.Height = 4
+	goroutines.Data = data
+	goroutines.LineColor = ui.ColorCyan
+
+	threads := ui.Sparkline{}
+	threads.Title = "threads"
+	threads.Height = 4
+	threads.Data = data
+	threads.LineColor = ui.ColorCyan
+
+	sp := ui.NewSparklines(goroutines, threads)
+	sp.Height = 11
 	sp.Border = false
 
-	filter := ui.NewPar(` :f to filter results by symbol regex; package, type or function name `)
-	filter.Height = 3
-
-	gs := make([]*ui.Gauge, 3)
+	gs := make([]*ui.Gauge, 12)
 	for i := range gs {
 		gs[i] = ui.NewGauge()
 		gs[i].LabelAlign = ui.AlignLeft
@@ -106,11 +121,11 @@ func draw() {
 	})
 	ui.Body.AddRows(
 		ui.NewRow(ui.NewCol(12, 0, p)),
+		ui.NewRow(ui.NewCol(12, 0, prompt)),
 		ui.NewRow(ui.NewCol(12, 0, sp)),
 		ui.NewRow(
-			ui.NewCol(4, 0, gs[0], gs[1], gs[2]),
+			ui.NewCol(4, 0, gs[0], gs[1], gs[2], gs[3], gs[4], gs[5]),
 			ui.NewCol(8, 0, ls)),
-		ui.NewRow(ui.NewCol(12, 0, filter)),
 	)
 	ui.Handle("/sys/wnd/resize", func(e ui.Event) {
 		ui.Body.Width = ui.TermWidth()
