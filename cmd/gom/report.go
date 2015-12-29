@@ -39,6 +39,8 @@ type Report struct {
 }
 
 func (r *Report) Inited() bool {
+	r.mu.Lock()
+	defer r.mu.Unlock()
 	return r.p != nil
 }
 
