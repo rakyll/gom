@@ -21,17 +21,11 @@ import (
 	ui "github.com/gizak/termui"
 )
 
-const usage = `- :c to see the current CPU profile
-- :h to see the current heap profile
-- :f to regex filter to focus by symbol name
-- :s to toggle cumulative sort of the results
-- :r to refresh the current profile
-- :p to paginate, e.g. :p=0 to view the first page
-`
-
 var (
-	p      = flag.String("p", "cpu", "name of the profile: cpu or heap")
-	target = flag.String("target", "http://localhost:6060", "the target process to profile; it has to enable pprof debug server")
+	promptMsg = ""
+	target    = flag.String("target", "http://localhost:6060", "the target process to profile; it has to enable pprof debug server")
+
+	prompt *ui.Par
 )
 
 var reports = make(map[string]*Report)
@@ -68,15 +62,16 @@ func draw() {
 		return ps
 	})()
 
-	p := ui.NewPar(usage)
-	p.Height = 8
-	p.BorderLabel = " gom - visual runtime profiler "
-	p.TextFgColor = ui.ColorWhite
-	p.BorderFg = ui.ColorCyan
-
-	prompt := ui.NewPar(` >_ `)
-	prompt.Height = 2
+	prompt = ui.NewPar(promptMsg)
+	prompt.Height = 1
 	prompt.Border = false
+
+	help := ui.NewPar(`:c, :h for profiles; :f to filter; :0 to paginate`)
+	help.Height = 1
+	help.Border = false
+	help.TextBgColor = ui.ColorBlue
+	help.Bg = ui.ColorBlue
+	help.TextFgColor = ui.ColorWhite
 
 	goroutines := ui.Sparkline{}
 	goroutines.Title = "goroutines"
@@ -94,47 +89,77 @@ func draw() {
 	sp.Height = 11
 	sp.Border = false
 
-	gs := make([]*ui.Gauge, 12)
+	gs := make([]*ui.Gauge, 10)
 	for i := range gs {
 		gs[i] = ui.NewGauge()
 		gs[i].LabelAlign = ui.AlignLeft
 		gs[i].Height = 2
 		gs[i].Border = false
-		gs[i].Percent = 50 + i*20
+		gs[i].Percent = 100 - i*10
 		gs[i].PaddingBottom = 1
 		gs[i].BarColor = ui.ColorRed
 	}
 
 	ls := ui.NewList()
 	ls.Border = false
-	ls.Items = []string{
-		"0 0% 0% 0.01s 100% 00000000000105a7 runtime.notesleep",
-		"",
-		"[2] Downloading File 2",
-		"",
-		"[3] Uploading File 3",
-	}
-	ls.Height = 5
+	// ls.Items = []string{
+	// 	" 0 0% 0% 0.01s 100% 00000000000105a7 runtime.notesleep",
+	// 	"",
+	// 	" [2] Downloading File 2",
+	// 	"",
+	// 	" [3] Uploading File 3",
+	// 	"",
+	// 	" [3] Uploading File 3",
+	// 	"",
+	// 	" [3] Uploading File 3",
+	// }
+	// ls.Height = 5
 
+	ui.Handle("/sys/kbd", func(e ui.Event) {
+		ev := e.Data.(ui.EvtKbd)
+		switch ev.KeyStr {
+		case ":":
+			promptMsg = ":"
+		case "C-8":
+			if l := len(promptMsg); l != 0 {
+				promptMsg = promptMsg[:l-1]
+			}
+		case "<enter>":
+			// todo
+			promptMsg = ""
+		case "<escape>":
+			promptMsg = ""
+		default:
+			promptMsg += ev.KeyStr
+		}
+		refresh()
+	})
 	ui.Handle("/sys/kbd/C-c", func(ui.Event) {
 		ui.StopLoop()
 	})
 	ui.Body.AddRows(
-		ui.NewRow(ui.NewCol(12, 0, p)),
-		ui.NewRow(ui.NewCol(12, 0, prompt)),
+		ui.NewRow(ui.NewCol(4, 0, prompt), ui.NewCol(8, 0, help)),
 		ui.NewRow(ui.NewCol(12, 0, sp)),
 		ui.NewRow(
-			ui.NewCol(4, 0, gs[0], gs[1], gs[2], gs[3], gs[4], gs[5]),
-			ui.NewCol(8, 0, ls)),
+			ui.NewCol(3, 0, gs[0], gs[1], gs[2], gs[3], gs[4], gs[5]),
+			ui.NewCol(9, 0, ls)),
 	)
+	ui.Handle("1s", func(e ui.Event) {
+		refresh()
+	})
 	ui.Handle("/sys/wnd/resize", func(e ui.Event) {
-		ui.Body.Width = ui.TermWidth()
-		ui.Body.Align()
-		ui.Render(ui.Body)
+		refresh()
 	})
 	ui.Body.Align()
 	ui.Render(ui.Body)
 	ui.Loop()
+}
+
+func refresh() {
+	prompt.Text = promptMsg
+	ui.Body.Width = ui.TermWidth()
+	ui.Body.Align()
+	ui.Render(ui.Body)
 }
 
 // func statsHandler(w http.ResponseWriter, r *http.Request) {
