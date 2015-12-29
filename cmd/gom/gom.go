@@ -143,13 +143,20 @@ func draw() {
 }
 
 func loadStats() {
+	const max = 120
 	s, err := fetchStats()
 	if err != nil {
 		// todo: display error
 		return
 	}
+	if n := len(sp.Lines[0].Data); n > max {
+		sp.Lines[0].Data = sp.Lines[0].Data[n-max : n]
+	}
 	sp.Lines[0].Title = fmt.Sprintf("goroutines (%d)", s.Goroutine)
 	sp.Lines[0].Data = append(sp.Lines[0].Data, s.Goroutine)
+	if n := len(sp.Lines[1].Data); n > max {
+		sp.Lines[1].Data = sp.Lines[1].Data[n-max : n]
+	}
 	sp.Lines[1].Title = fmt.Sprintf("threads (%d)", s.Thread)
 	sp.Lines[1].Data = append(sp.Lines[1].Data, s.Thread)
 }
