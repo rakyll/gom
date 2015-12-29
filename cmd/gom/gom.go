@@ -149,9 +149,9 @@ func loadStats() {
 		return
 	}
 	sp.Lines[0].Title = fmt.Sprintf("goroutines (%d)", s.Goroutine)
-	sp.Lines[0].Data = append(sp.Lines[0].Data, s.Goroutine, 0)
+	sp.Lines[0].Data = append(sp.Lines[0].Data, s.Goroutine)
 	sp.Lines[1].Title = fmt.Sprintf("threads (%d)", s.Thread)
-	sp.Lines[1].Data = append(sp.Lines[1].Data, s.Thread, 0)
+	sp.Lines[1].Data = append(sp.Lines[1].Data, s.Thread)
 }
 
 func loadReport(force bool) {
