@@ -16,22 +16,14 @@ package main
 
 import (
 	"flag"
-	"fmt"
-	"io/ioutil"
-	"log"
-	"net"
-	"net/http"
-	"regexp"
-	"strconv"
+	"math"
 
-	"github.com/rakyll/statik/fs"
-
-	_ "github.com/rakyll/gom/statik"
+	ui "github.com/gizak/termui"
 )
 
 var (
-	listen = flag.String("http", "localhost:6464", "the hostname and port the server is listening to")
-	target = flag.String("target", "http://localhost:6060", "the target process that enables pprof debug server")
+	p      = flag.String("p", "cpu", "name of the profile: cpu or heap")
+	target = flag.String("target", "http://localhost:6060", "the target process to profile; it has to enable pprof debug server")
 )
 
 var reports = make(map[string]*Report)
@@ -43,90 +35,153 @@ func init() {
 
 func main() {
 	flag.Parse()
-	// stats is a proxifying target/debug/pprofstats.
-	// TODO(jbd): If the UI frontend knows about the target, we
-	// might have eliminated the proxy handler.
-	http.HandleFunc("/stats", statsHandler)
 
-	// p responds back with a profile report.
-	http.HandleFunc("/p", profileHandler)
-
-	statikFS, err := fs.New()
-	if err != nil {
-		log.Fatal(err)
+	if err := ui.Init(); err != nil {
+		panic(err)
 	}
-	http.Handle("/", http.FileServer(statikFS))
-	host, port, err := net.SplitHostPort(*listen)
-	if err != nil {
-		log.Fatal(err)
-	}
-	if host == "" {
-		host = "localhost"
-	}
-	log.Printf("Point your browser to http://%s", net.JoinHostPort(host, port))
-	log.Fatal(http.ListenAndServe(*listen, nil))
+	defer ui.Close()
+	draw()
 }
 
-func statsHandler(w http.ResponseWriter, r *http.Request) {
-	url := fmt.Sprintf("%s/debug/pprofstats", *target)
-	resp, err := http.Get(url)
-	if err != nil {
-		log.Print(err)
-		w.WriteHeader(500)
-		fmt.Fprintf(w, "%v", err)
-		return
-	}
-	defer resp.Body.Close()
-	all, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		w.WriteHeader(500)
-		fmt.Fprintf(w, "%v", err)
-		return
-	}
-	if resp.StatusCode != http.StatusOK {
-		w.WriteHeader(500)
-		fmt.Fprintf(w, "%s", all)
-		return
-	}
-	w.Header().Set("Content-Type", "application/json")
-	fmt.Fprintf(w, "%s", all)
-}
-
-func profileHandler(w http.ResponseWriter, r *http.Request) {
-	profile := r.FormValue("profile")
-	filter := r.FormValue("filter")
-	img, _ := strconv.ParseBool(r.FormValue("img"))
-	cumsort, _ := strconv.ParseBool(r.FormValue("cumsort"))
-	force, _ := strconv.ParseBool(r.FormValue("force"))
-
-	rpt, ok := reports[profile]
-	if !ok {
-		w.WriteHeader(404)
-		fmt.Fprintf(w, "Profile not found.")
-		return
-	}
-	if !rpt.Inited() || force {
-		if err := rpt.Fetch(0); err != nil {
-			w.WriteHeader(500)
-			fmt.Fprintf(w, "%v", err)
-			return
+func draw() {
+	sinps := (func() []float64 {
+		n := 400
+		ps := make([]float64, n)
+		for i := range ps {
+			ps[i] = 1 + math.Sin(float64(i)/5)
 		}
+		return ps
+	})()
+	data := (func() []int {
+		ps := make([]int, len(sinps))
+		for i, v := range sinps {
+			ps[i] = int(100*v + 10)
+		}
+		return ps
+	})()
+
+	p := ui.NewPar(`usage: ":cpu" for cpu, ":heap" for heap profile; ":c" to sort cumulatively `)
+	p.Height = 3
+	p.Width = 60
+	p.BorderLabel = " gom - visual runtime profiler "
+	p.TextFgColor = ui.ColorWhite
+	p.BorderFg = ui.ColorCyan
+
+	spark := ui.Sparkline{}
+	spark.Height = 11
+	spark.Data = data
+	spark.LineColor = ui.ColorCyan
+
+	sp := ui.NewSparklines(spark)
+	sp.Height = 13
+	sp.Border = false
+
+	filter := ui.NewPar(` :f to filter results by symbol regex; package, type or function name `)
+	filter.Height = 3
+
+	gs := make([]*ui.Gauge, 3)
+	for i := range gs {
+		gs[i] = ui.NewGauge()
+		gs[i].LabelAlign = ui.AlignLeft
+		gs[i].Height = 2
+		gs[i].Border = false
+		gs[i].Percent = 50 + i*20
+		gs[i].PaddingBottom = 1
+		gs[i].BarColor = ui.ColorRed
 	}
-	var re *regexp.Regexp
-	var err error
-	if filter != "" {
-		re, err = regexp.Compile(filter)
+
+	ls := ui.NewList()
+	ls.Border = false
+	ls.Items = []string{
+		"0 0% 0% 0.01s 100% 00000000000105a7 runtime.notesleep",
+		"",
+		"[2] Downloading File 2",
+		"",
+		"[3] Uploading File 3",
 	}
-	if err != nil {
-		w.WriteHeader(400)
-		fmt.Fprintf(w, "%v", err)
-		return
-	}
-	if img {
-		w.Header().Set("Content-Type", "image/svg+xml")
-		rpt.Draw(w, cumsort, re)
-		return
-	}
-	w.Header().Set("Content-Type", "application/json")
-	rpt.Filter(w, cumsort, re)
+	ls.Height = 5
+
+	ui.Handle("/sys/kbd/C-c", func(ui.Event) {
+		ui.StopLoop()
+	})
+	ui.Body.AddRows(
+		ui.NewRow(ui.NewCol(12, 0, p)),
+		ui.NewRow(ui.NewCol(12, 0, sp)),
+		ui.NewRow(
+			ui.NewCol(4, 0, gs[0], gs[1], gs[2]),
+			ui.NewCol(8, 0, ls)),
+		ui.NewRow(ui.NewCol(12, 0, filter)),
+	)
+	ui.Handle("/sys/wnd/resize", func(e ui.Event) {
+		ui.Body.Width = ui.TermWidth()
+		ui.Body.Align()
+		ui.Render(ui.Body)
+	})
+	ui.Body.Align()
+	ui.Render(ui.Body)
+	ui.Loop()
 }
+
+// func statsHandler(w http.ResponseWriter, r *http.Request) {
+// 	url := fmt.Sprintf("%s/debug/pprofstats", *target)
+// 	resp, err := http.Get(url)
+// 	if err != nil {
+// 		log.Print(err)
+// 		w.WriteHeader(500)
+// 		fmt.Fprintf(w, "%v", err)
+// 		return
+// 	}
+// 	defer resp.Body.Close()
+// 	all, err := ioutil.ReadAll(resp.Body)
+// 	if err != nil {
+// 		w.WriteHeader(500)
+// 		fmt.Fprintf(w, "%v", err)
+// 		return
+// 	}
+// 	if resp.StatusCode != http.StatusOK {
+// 		w.WriteHeader(500)
+// 		fmt.Fprintf(w, "%s", all)
+// 		return
+// 	}
+// 	w.Header().Set("Content-Type", "application/json")
+// 	fmt.Fprintf(w, "%s", all)
+// }
+
+// func profileHandler(w http.ResponseWriter, r *http.Request) {
+// 	profile := r.FormValue("profile")
+// 	filter := r.FormValue("filter")
+// 	img, _ := strconv.ParseBool(r.FormValue("img"))
+// 	cumsort, _ := strconv.ParseBool(r.FormValue("cumsort"))
+// 	force, _ := strconv.ParseBool(r.FormValue("force"))
+
+// 	rpt, ok := reports[profile]
+// 	if !ok {
+// 		w.WriteHeader(404)
+// 		fmt.Fprintf(w, "Profile not found.")
+// 		return
+// 	}
+// 	if !rpt.Inited() || force {
+// 		if err := rpt.Fetch(0); err != nil {
+// 			w.WriteHeader(500)
+// 			fmt.Fprintf(w, "%v", err)
+// 			return
+// 		}
+// 	}
+// 	var re *regexp.Regexp
+// 	var err error
+// 	if filter != "" {
+// 		re, err = regexp.Compile(filter)
+// 	}
+// 	if err != nil {
+// 		w.WriteHeader(400)
+// 		fmt.Fprintf(w, "%v", err)
+// 		return
+// 	}
+// 	if img {
+// 		w.Header().Set("Content-Type", "image/svg+xml")
+// 		rpt.Draw(w, cumsort, re)
+// 		return
+// 	}
+// 	w.Header().Set("Content-Type", "application/json")
+// 	rpt.Filter(w, cumsort, re)
+// }
