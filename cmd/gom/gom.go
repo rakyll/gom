@@ -143,7 +143,7 @@ func draw() {
 }
 
 func loadStats() {
-	const max = 120
+	var max = ui.TermWidth()
 	s, err := fetchStats()
 	if err != nil {
 		// todo: display error
