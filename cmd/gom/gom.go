@@ -21,15 +21,11 @@ import (
 	ui "github.com/gizak/termui"
 )
 
-const (
-	profileCPU = iota
-	profileHeap
-)
-
 var (
 	target = flag.String("target", "http://localhost:6060", "the target process to profile; it has to enable pprof debug server")
 
 	prompt  *ui.Par
+	ls      *ui.List
 	sp      *ui.Sparklines
 	display *ui.Par
 
@@ -37,8 +33,9 @@ var (
 	heapProfile    = &Report{name: "heap"}
 	currentProfile = heapProfile
 
-	promptMsg string
-	filter    string
+	reportItems []string
+	promptMsg   string
+	filter      string
 )
 
 func main() {
@@ -71,6 +68,7 @@ func main() {
 		ui.StopLoop()
 	})
 	ui.Handle("/timer/1s", func(ui.Event) {
+		loadProfile(false)
 		loadStats()
 		refresh()
 	})
@@ -78,6 +76,7 @@ func main() {
 		ui.Body.Width = ui.TermWidth()
 		refresh()
 	})
+
 	ui.Body.Align()
 	ui.Render(ui.Body)
 	ui.Loop()
@@ -124,7 +123,7 @@ func draw() {
 		g[i].BarColor = ui.ColorRed
 	}
 
-	ls := ui.NewList()
+	ls = ui.NewList()
 	ls.Border = false
 	// ls.Items = []string{
 	// 	" 0 0% 0% 0.01s 100% 00000000000105a7 runtime.notesleep",
@@ -146,7 +145,6 @@ func draw() {
 			ui.NewCol(3, 0, g[0], g[1], g[2], g[3], g[4], g[5]),
 			ui.NewCol(9, 0, ls)),
 	)
-
 }
 
 func loadStats() {
@@ -156,7 +154,6 @@ func loadStats() {
 		displayMsg(fmt.Sprintf("error fetching stats: %v", err))
 		return
 	}
-	displayMsg("")
 	var cnts = []struct {
 		cnt      int
 		titleFmt string
@@ -173,17 +170,24 @@ func loadStats() {
 	}
 }
 
-func loadReport(force bool) {
-
+func loadProfile(force bool) {
+	if err := currentProfile.Fetch(0); err != nil {
+		displayMsg(err.Error())
+		return
+	}
+	reportItems = currentProfile.Filter(true, nil)
+	fmt.Println(reportItems)
 }
 
 func refresh() {
 	prompt.Text = promptMsg
+	ls.Items = reportItems
 	ui.Body.Align()
 	ui.Render(ui.Body)
 }
 
 func displayMsg(msg string) {
+	// TODO(jbd): hide after n secs.
 	display.Text = msg
 	ui.Render(display)
 }
