@@ -78,7 +78,7 @@ func (r *Report) Filter(cum bool, focus *regexp.Regexp) []string {
 	c := r.p.Copy()
 	c.FilterSamplesByName(focus, nil, nil)
 	rpt := report.NewDefault(c, report.Options{
-		OutputFormat:   report.JSON,
+		OutputFormat:   report.Text,
 		CumSort:        cum,
 		PrintAddresses: true,
 	})
