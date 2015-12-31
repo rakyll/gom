@@ -33,12 +33,12 @@ var (
 	sp      *ui.Sparklines
 	display *ui.Par
 
-	promptMsg      string
-	currentProfile *Report
-	filter         string
+	cpuProfile     = &Report{name: "profile", secs: 30}
+	heapProfile    = &Report{name: "heap"}
+	currentProfile = heapProfile
 
-	cpuProfile  = &Report{name: "profile", secs: 30}
-	heapProfile = &Report{name: "heap"}
+	promptMsg string
+	filter    string
 )
 
 func main() {
@@ -48,6 +48,39 @@ func main() {
 	}
 	defer ui.Close()
 	draw()
+	ui.Handle("/sys/kbd", func(e ui.Event) {
+		ev := e.Data.(ui.EvtKbd)
+		switch ev.KeyStr {
+		case ":":
+			promptMsg = ":"
+		case "C-8":
+			if l := len(promptMsg); l != 0 {
+				promptMsg = promptMsg[:l-1]
+			}
+		case "<enter>":
+			// todo
+			promptMsg = ""
+		case "<escape>":
+			promptMsg = ""
+		default:
+			promptMsg += ev.KeyStr
+		}
+		refresh()
+	})
+	ui.Handle("/sys/kbd/C-c", func(ui.Event) {
+		ui.StopLoop()
+	})
+	ui.Handle("/timer/1s", func(ui.Event) {
+		loadStats()
+		refresh()
+	})
+	ui.Handle("/sys/wnd/resize", func(e ui.Event) {
+		ui.Body.Width = ui.TermWidth()
+		refresh()
+	})
+	ui.Body.Align()
+	ui.Render(ui.Body)
+	ui.Loop()
 }
 
 func draw() {
@@ -113,39 +146,7 @@ func draw() {
 			ui.NewCol(3, 0, g[0], g[1], g[2], g[3], g[4], g[5]),
 			ui.NewCol(9, 0, ls)),
 	)
-	ui.Handle("/sys/kbd", func(e ui.Event) {
-		ev := e.Data.(ui.EvtKbd)
-		switch ev.KeyStr {
-		case ":":
-			promptMsg = ":"
-		case "C-8":
-			if l := len(promptMsg); l != 0 {
-				promptMsg = promptMsg[:l-1]
-			}
-		case "<enter>":
-			// todo
-			promptMsg = ""
-		case "<escape>":
-			promptMsg = ""
-		default:
-			promptMsg += ev.KeyStr
-		}
-		refresh()
-	})
-	ui.Handle("/sys/kbd/C-c", func(ui.Event) {
-		ui.StopLoop()
-	})
-	ui.Handle("/timer/1s", func(ui.Event) {
-		loadStats()
-		refresh()
-	})
-	ui.Handle("/sys/wnd/resize", func(e ui.Event) {
-		ui.Body.Width = ui.TermWidth()
-		refresh()
-	})
-	ui.Body.Align()
-	ui.Render(ui.Body)
-	ui.Loop()
+
 }
 
 func loadStats() {
@@ -155,6 +156,7 @@ func loadStats() {
 		displayMsg(fmt.Sprintf("error fetching stats: %v", err))
 		return
 	}
+	displayMsg("")
 	var cnts = []struct {
 		cnt      int
 		titleFmt string
