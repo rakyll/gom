@@ -25,10 +25,10 @@ import (
 	"sync"
 	"time"
 
-	"github.com/rakyll/gom/internal/pprof/fetch"
-	"github.com/rakyll/gom/internal/pprof/profile"
-	"github.com/rakyll/gom/internal/pprof/report"
-	"github.com/rakyll/gom/internal/pprof/symbolz"
+	"github.com/rakyll/gom/internal/fetch"
+	"github.com/rakyll/gom/internal/profile"
+	"github.com/rakyll/gom/internal/report"
+	"github.com/rakyll/gom/internal/symbolz"
 )
 
 type Report struct {

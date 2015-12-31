@@ -13,8 +13,8 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/rakyll/gom/internal/pprof/plugin"
-	"github.com/rakyll/gom/internal/pprof/profile"
+	"github.com/rakyll/gom/plugin"
+	"github.com/rakyll/gom/profile"
 )
 
 // Symbolize adds symbol and line number information to all locations
@@ -30,6 +30,10 @@ func Symbolize(mode string, prof *profile.Profile, obj plugin.ObjTool, ui plugin
 			force = true
 		default:
 		}
+	}
+
+	if len(prof.Mapping) == 0 {
+		return fmt.Errorf("no known mappings")
 	}
 
 	mt, err := newMapping(prof, obj, ui, force)
