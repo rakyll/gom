@@ -112,38 +112,13 @@ func draw() {
 	sp.Height = 10
 	sp.Border = false
 
-	g := make([]*ui.Gauge, 10)
-	for i := range g {
-		g[i] = ui.NewGauge()
-		g[i].LabelAlign = ui.AlignLeft
-		g[i].Height = 2
-		g[i].Border = false
-		g[i].Percent = 100 - i*10
-		g[i].PaddingBottom = 1
-		g[i].BarColor = ui.ColorRed
-	}
-
 	ls = ui.NewList()
 	ls.Border = false
-	// ls.Items = []string{
-	// 	" 0 0% 0% 0.01s 100% 00000000000105a7 runtime.notesleep",
-	// 	"",
-	// 	" [2] Downloading File 2",
-	// 	"",
-	// 	" [3] Uploading File 3",
-	// 	"",
-	// 	" [3] Uploading File 3",
-	// 	"",
-	// 	" [3] Uploading File 3",
-	// }
-	// ls.Height = 5
 	ui.Body.AddRows(
 		ui.NewRow(ui.NewCol(4, 0, prompt), ui.NewCol(8, 0, help)),
 		ui.NewRow(ui.NewCol(12, 0, sp)),
 		ui.NewRow(ui.NewCol(12, 0, display)),
-		ui.NewRow(
-			ui.NewCol(3, 0, g[0], g[1], g[2], g[3], g[4], g[5]),
-			ui.NewCol(9, 0, ls)),
+		ui.NewRow(ui.NewCol(12, 0, ls)),
 	)
 }
 
@@ -176,12 +151,13 @@ func loadProfile(force bool) {
 		return
 	}
 	reportItems = currentProfile.Filter(true, nil)
-	fmt.Println(reportItems)
 }
 
 func refresh() {
+	ls.Height = ui.TermHeight() - 13
+
 	prompt.Text = promptMsg
-	ls.Items = reportItems
+	ls.Items = reportItems[:ls.Height]
 	ui.Body.Align()
 	ui.Render(ui.Body)
 }
