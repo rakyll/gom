@@ -29,8 +29,9 @@ const (
 var (
 	target = flag.String("target", "http://localhost:6060", "the target process to profile; it has to enable pprof debug server")
 
-	prompt *ui.Par
-	sp     *ui.Sparklines
+	prompt  *ui.Par
+	sp      *ui.Sparklines
+	display *ui.Par
 
 	promptMsg      string
 	currentProfile *Report
@@ -50,6 +51,10 @@ func main() {
 }
 
 func draw() {
+	display = ui.NewPar("")
+	display.Height = 2
+	display.Border = false
+
 	prompt = ui.NewPar(promptMsg)
 	prompt.Height = 1
 	prompt.Border = false
@@ -72,7 +77,7 @@ func draw() {
 	ts.LineColor = ui.ColorCyan
 
 	sp = ui.NewSparklines(gs, ts)
-	sp.Height = 11
+	sp.Height = 10
 	sp.Border = false
 
 	g := make([]*ui.Gauge, 10)
@@ -103,6 +108,7 @@ func draw() {
 	ui.Body.AddRows(
 		ui.NewRow(ui.NewCol(4, 0, prompt), ui.NewCol(8, 0, help)),
 		ui.NewRow(ui.NewCol(12, 0, sp)),
+		ui.NewRow(ui.NewCol(12, 0, display)),
 		ui.NewRow(
 			ui.NewCol(3, 0, g[0], g[1], g[2], g[3], g[4], g[5]),
 			ui.NewCol(9, 0, ls)),
@@ -146,7 +152,7 @@ func loadStats() {
 	var max = ui.TermWidth()
 	s, err := fetchStats()
 	if err != nil {
-		// todo: display error
+		displayMsg(fmt.Sprintf("error fetching stats: %v", err))
 		return
 	}
 	var cnts = []struct {
@@ -173,4 +179,9 @@ func refresh() {
 	prompt.Text = promptMsg
 	ui.Body.Align()
 	ui.Render(ui.Body)
+}
+
+func displayMsg(msg string) {
+	display.Text = msg
+	ui.Render(display)
 }
