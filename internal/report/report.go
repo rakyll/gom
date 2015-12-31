@@ -372,8 +372,8 @@ func printText(w io.Writer, rpt *Report) error {
 	origCount, droppedNodes, _ := g.preprocess(rpt)
 	fmt.Fprintln(w, strings.Join(legendDetailLabels(rpt, g, origCount, droppedNodes, 0), "\n"))
 
-	fmt.Fprintf(w, "%10s %5s%% %5s%% %10s %5s%%\n",
-		"flat", "flat", "sum", "cum", "cum")
+	// fmt.Fprintf(w, "%10s %5s%% %5s%% %10s %5s%%\n",
+	// 	"flat", "flat", "sum", "cum", "cum")
 
 	var flatSum int64
 	for _, n := range g.ns {
