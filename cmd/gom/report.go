@@ -21,6 +21,7 @@ import (
 	"io"
 	"os/exec"
 	"regexp"
+	"strings"
 	"sync"
 	"time"
 
@@ -72,7 +73,7 @@ func (r *Report) Filter(cum bool, focus *regexp.Regexp) []string {
 	r.mu.Lock()
 	defer r.mu.Unlock()
 	if r.p == nil {
-		return
+		return nil
 	}
 	c := r.p.Copy()
 	c.FilterSamplesByName(focus, nil, nil)
@@ -81,9 +82,9 @@ func (r *Report) Filter(cum bool, focus *regexp.Regexp) []string {
 		CumSort:        cum,
 		PrintAddresses: true,
 	})
-	data := bytes.NewBuffer(nil)
-	report.Generate(data, rpt, nil)
-	return strings.Split(data, "\n")
+	buf := bytes.NewBuffer(nil)
+	report.Generate(buf, rpt, nil)
+	return strings.Split(buf.String(), "\n")
 }
 
 func (r *Report) Draw(w io.Writer, cum bool, focus *regexp.Regexp) error {
