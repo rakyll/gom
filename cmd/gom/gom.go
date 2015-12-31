@@ -149,16 +149,20 @@ func loadStats() {
 		// todo: display error
 		return
 	}
-	if n := len(sp.Lines[0].Data); n > max {
-		sp.Lines[0].Data = sp.Lines[0].Data[n-max : n]
+	var cnts = []struct {
+		cnt      int
+		titleFmt string
+	}{
+		{s.Goroutine, "goroutines (%d)"},
+		{s.Thread, "threads (%d)"},
 	}
-	sp.Lines[0].Title = fmt.Sprintf("goroutines (%d)", s.Goroutine)
-	sp.Lines[0].Data = append(sp.Lines[0].Data, s.Goroutine)
-	if n := len(sp.Lines[1].Data); n > max {
-		sp.Lines[1].Data = sp.Lines[1].Data[n-max : n]
+	for i, v := range cnts {
+		if n := len(sp.Lines[i].Data); n > max {
+			sp.Lines[i].Data = sp.Lines[i].Data[n-max : n]
+		}
+		sp.Lines[i].Title = fmt.Sprintf(v.titleFmt, v.cnt)
+		sp.Lines[i].Data = append(sp.Lines[i].Data, v.cnt)
 	}
-	sp.Lines[1].Title = fmt.Sprintf("threads (%d)", s.Thread)
-	sp.Lines[1].Data = append(sp.Lines[1].Data, s.Thread)
 }
 
 func loadReport(force bool) {
