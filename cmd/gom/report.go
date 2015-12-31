@@ -68,7 +68,7 @@ func (r *Report) Fetch(secs int) error {
 // it reports back with the entire set of calls.
 // Focus regex works on the package, type and function names. Filtered
 // results will include parent samples from the call graph.
-func (r *Report) Filter(w io.Writer, cum bool, focus *regexp.Regexp) {
+func (r *Report) Filter(cum bool, focus *regexp.Regexp) []string {
 	r.mu.Lock()
 	defer r.mu.Unlock()
 	if r.p == nil {
@@ -81,7 +81,9 @@ func (r *Report) Filter(w io.Writer, cum bool, focus *regexp.Regexp) {
 		CumSort:        cum,
 		PrintAddresses: true,
 	})
-	report.Generate(w, rpt, nil)
+	data := bytes.NewBuffer(nil)
+	report.Generate(data, rpt, nil)
+	return strings.Split(data, "\n")
 }
 
 func (r *Report) Draw(w io.Writer, cum bool, focus *regexp.Regexp) error {
