@@ -69,7 +69,8 @@ func (r *Report) Fetch(secs int) error {
 // Focus regex works on the package, type and function names. Filtered
 // results will include parent samples from the call graph.
 func (r *Report) Filter(w io.Writer, cum bool, focus *regexp.Regexp) {
-	// TODO(jbd): Support ignore and hide regex parameters.
+	r.mu.Lock()
+	defer r.mu.Unlock()
 	if r.p == nil {
 		return
 	}
