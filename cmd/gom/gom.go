@@ -63,10 +63,12 @@ func main() {
 			handleInput()
 			promptMsg = ""
 		case "<left>":
+		case "<up>":
 			if reportPage > 0 {
 				reportPage--
 			}
 		case "<right>":
+		case "<down>":
 			reportPage++
 		case "<escape>":
 			promptMsg = ""
