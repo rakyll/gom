@@ -132,6 +132,7 @@ func loadStats() {
 		displayMsg(fmt.Sprintf("error fetching stats: %v", err))
 		return
 	}
+	displayMsg("")
 	var cnts = []struct {
 		cnt      int
 		titleFmt string
