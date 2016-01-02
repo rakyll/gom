@@ -62,6 +62,12 @@ func main() {
 		case "<enter>":
 			handleInput()
 			promptMsg = ""
+		case "<left>":
+			if reportPage > 0 {
+				reportPage--
+			}
+		case "<right>":
+			reportPage++
 		case "<escape>":
 			promptMsg = ""
 		default:
@@ -90,14 +96,14 @@ func main() {
 
 func draw() {
 	display = ui.NewPar("")
-	display.Height = 2
+	display.Height = 1
 	display.Border = false
 
 	prompt = ui.NewPar(promptMsg)
 	prompt.Height = 1
 	prompt.Border = false
 
-	help := ui.NewPar(`:c, :h for profiles; :f to filter; :0 to paginate`)
+	help := ui.NewPar(`:c, :h for profiles; :f to filter; < and > to paginate`)
 	help.Height = 1
 	help.Border = false
 	help.TextBgColor = ui.ColorBlue
@@ -164,7 +170,7 @@ func loadProfile(force bool) {
 func refresh() {
 	prompt.Text = promptMsg
 
-	nreport := ui.TermHeight() - 14
+	nreport := ui.TermHeight() - 13
 	ls.Height = nreport
 	if len(reportItems) > nreport*reportPage {
 		// can seek to the page
@@ -208,7 +214,6 @@ func handleInput() {
 		refresh()
 		return
 	}
-	// TODO: handle pagination
 }
 
 func displayMsg(msg string) {
