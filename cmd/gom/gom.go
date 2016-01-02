@@ -62,6 +62,7 @@ func main() {
 		case "<escape>":
 			promptMsg = ""
 		default:
+			// TODO: filter irrelevant keys such as up, down, etc.
 			promptMsg += ev.KeyStr
 		}
 		refresh()
@@ -172,7 +173,21 @@ func refresh() {
 }
 
 func handleInput() {
-	// TODO
+	switch promptMsg {
+	case ":c":
+		currentProfile = cpuProfile
+		loadProfile(false)
+	case ":h":
+		currentProfile = heapProfile
+		loadProfile(false)
+	case ":r":
+		// refresh
+		loadProfile(true)
+	case ":s":
+		// sort again
+	}
+	// TODO: handle pagination
+	// TODO: handle filtering
 }
 
 func displayMsg(msg string) {
