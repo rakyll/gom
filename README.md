@@ -28,6 +28,13 @@ Now, you are ready to launch gom.
 $ gom
 ```
 
+- :c loads the CPU profile.
+- :h loads the heap profile (default profile on launch).
+- :r refreshes the current profile.
+- :s toggles the cumulative sort and resorts the items.
+- :0 loads the first page of the profile items, :1 loads the second and so on.
+- :f=\<regex\> filters the profile with the provided regex.
+
 ## Goals
 
 * Building a lightweight tool that works well with live profiles is a necessity. Over the time, I recognized that a lot of people around me delayed to use the existing pprof tools because it's a tedious experience.
