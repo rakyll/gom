@@ -17,6 +17,8 @@ package main
 import (
 	"flag"
 	"fmt"
+	"regexp"
+	"strings"
 
 	ui "github.com/gizak/termui"
 )
@@ -155,7 +157,8 @@ func loadProfile(force bool) {
 		displayMsg(err.Error())
 		return
 	}
-	reportItems = currentProfile.Filter(cum, nil)
+	re, _ := regexp.Compile(filter)
+	reportItems = currentProfile.Filter(cum, re)
 }
 
 func refresh() {
@@ -181,21 +184,31 @@ func handleInput() {
 		currentProfile = cpuProfile
 		loadProfile(false)
 		refresh()
+		return
 	case ":h":
 		currentProfile = heapProfile
 		loadProfile(false)
 		refresh()
+		return
 	case ":r":
-		// refresh
 		loadProfile(true)
 		refresh()
+		return
 	case ":s":
 		cum = !cum
 		loadProfile(false)
 		refresh()
+		return
+	}
+	// handle filtering
+	if strings.HasPrefix(promptMsg, ":f=") {
+		re := regexp.MustCompile(":f=(.*)")
+		filter = re.FindStringSubmatch(promptMsg)[1]
+		loadProfile(false)
+		refresh()
+		return
 	}
 	// TODO: handle pagination
-	// TODO: handle filtering
 }
 
 func displayMsg(msg string) {
