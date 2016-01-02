@@ -16,10 +16,7 @@ package main
 
 import (
 	"bytes"
-	"errors"
 	"fmt"
-	"io"
-	"os/exec"
 	"regexp"
 	"strings"
 	"sync"
@@ -49,7 +46,6 @@ func (r *Report) Fetch(force bool, secs int) error {
 	if secs == 0 {
 		secs = r.secs
 	}
-	// TODO(jbd): Set timeout according to the seonds parameter.
 	url := fmt.Sprintf("%s/debug/pprof/%s?seconds=%d", *target, r.name, secs)
 	p, err := fetch.FetchProfile(url, 60*time.Second)
 	if err != nil {
