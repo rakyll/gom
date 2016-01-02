@@ -83,28 +83,3 @@ func (r *Report) Filter(cum bool, focus *regexp.Regexp) []string {
 	report.Generate(buf, rpt, nil)
 	return strings.Split(buf.String(), "\n")
 }
-
-func (r *Report) Draw(w io.Writer, cum bool, focus *regexp.Regexp) error {
-	// TODO(jbd): Support ignore and hide regex parameters.
-	if r.p == nil {
-		return errors.New("no such profile")
-	}
-	c := r.p.Copy()
-	c.FilterSamplesByName(focus, nil, nil)
-	rpt := report.NewDefault(c, report.Options{
-		OutputFormat: report.Dot,
-		CumSort:      cum,
-	})
-	data := bytes.NewBuffer(nil)
-	report.Generate(data, rpt, nil)
-	cmd := exec.Command("dot", "-Tsvg")
-	in, _ := cmd.StdinPipe()
-	_, err := io.Copy(in, data)
-	if err != nil {
-		return err
-	}
-	in.Close()
-	out, err := cmd.Output()
-	_, err = w.Write(out)
-	return err
-}
