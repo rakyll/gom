@@ -39,16 +39,13 @@ type Report struct {
 	secs int
 }
 
-func (r *Report) Inited() bool {
-	r.mu.Lock()
-	defer r.mu.Unlock()
-	return r.p != nil
-}
-
 // Fetch fetches the current profile and the symbols from the target program.
-func (r *Report) Fetch(secs int) error {
+func (r *Report) Fetch(force bool, secs int) error {
 	r.mu.Lock()
 	defer r.mu.Unlock()
+	if r.p != nil && !force {
+		return nil
+	}
 	if secs == 0 {
 		secs = r.secs
 	}
