@@ -29,8 +29,8 @@ var (
 	sp      *ui.Sparklines
 	display *ui.Par
 
-	cpuProfile     = &Report{name: "profile", secs: 30}
-	heapProfile    = &Report{name: "heap"}
+	cpuProfile     = &report{name: "profile", secs: 30}
+	heapProfile    = &report{name: "heap"}
 	currentProfile = heapProfile
 
 	reportPage  int
