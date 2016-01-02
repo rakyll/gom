@@ -24,13 +24,11 @@ go func() {
 
 ```
 
-Now, you are ready to launch the gom.
+Now, you are ready to launch gom.
 
 ```
 $ gom
 ```
-
-Point your browser to [http://localhost:6464](http://localhost:6464).
 
 ## Goals
 
