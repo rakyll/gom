@@ -33,11 +33,12 @@ var (
 	heapProfile    = &report{name: "heap"}
 	currentProfile = heapProfile
 
+	promptMsg string
+
 	reportPage  int
 	reportItems []string
-
-	promptMsg string
-	filter    string
+	cum         bool
+	filter      string
 )
 
 func main() {
@@ -154,7 +155,7 @@ func loadProfile(force bool) {
 		displayMsg(err.Error())
 		return
 	}
-	reportItems = currentProfile.Filter(true, nil)
+	reportItems = currentProfile.Filter(cum, nil)
 }
 
 func refresh() {
@@ -179,14 +180,19 @@ func handleInput() {
 	case ":c":
 		currentProfile = cpuProfile
 		loadProfile(false)
+		refresh()
 	case ":h":
 		currentProfile = heapProfile
 		loadProfile(false)
+		refresh()
 	case ":r":
 		// refresh
 		loadProfile(true)
+		refresh()
 	case ":s":
-		// sort again
+		cum = !cum
+		loadProfile(false)
+		refresh()
 	}
 	// TODO: handle pagination
 	// TODO: handle filtering
