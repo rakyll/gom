@@ -173,6 +173,7 @@ func refresh() {
 }
 
 func handleInput() {
+	// TODO(jbd): disable input when handling input.
 	switch promptMsg {
 	case ":c":
 		currentProfile = cpuProfile
