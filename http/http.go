@@ -32,6 +32,7 @@ type stats struct {
 }
 
 func init() {
+	// TODO(jbd): enable block profile.
 	http.HandleFunc("/debug/pprofstats", func(w http.ResponseWriter, r *http.Request) {
 		n := &stats{
 			Goroutine: pprof.Lookup("goroutine").Count(),
