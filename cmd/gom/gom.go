@@ -33,9 +33,11 @@ var (
 	heapProfile    = &Report{name: "heap"}
 	currentProfile = heapProfile
 
+	reportPage  int
 	reportItems []string
-	promptMsg   string
-	filter      string
+
+	promptMsg string
+	filter    string
 )
 
 func main() {
@@ -154,10 +156,17 @@ func loadProfile(force bool) {
 }
 
 func refresh() {
-	ls.Height = ui.TermHeight() - 13
-
 	prompt.Text = promptMsg
-	ls.Items = reportItems[:ls.Height]
+
+	nreport := ui.TermHeight() - 14
+	ls.Height = nreport
+	if len(reportItems) > nreport*reportPage {
+		// can seek to the page
+		ls.Items = reportItems[nreport*reportPage : len(reportItems)]
+	} else {
+		ls.Items = []string{}
+	}
+
 	ui.Body.Align()
 	ui.Render(ui.Body)
 }
