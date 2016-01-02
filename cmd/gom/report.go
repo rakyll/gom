@@ -24,11 +24,11 @@ import (
 
 	"github.com/rakyll/gom/internal/fetch"
 	"github.com/rakyll/gom/internal/profile"
-	"github.com/rakyll/gom/internal/report"
+	goreport "github.com/rakyll/gom/internal/report"
 	"github.com/rakyll/gom/internal/symbolz"
 )
 
-type Report struct {
+type report struct {
 	mu sync.Mutex
 	p  *profile.Profile
 
@@ -37,7 +37,7 @@ type Report struct {
 }
 
 // Fetch fetches the current profile and the symbols from the target program.
-func (r *Report) Fetch(force bool, secs int) error {
+func (r *report) Fetch(force bool, secs int) error {
 	r.mu.Lock()
 	defer r.mu.Unlock()
 	if r.p != nil && !force {
@@ -62,7 +62,7 @@ func (r *Report) Fetch(force bool, secs int) error {
 // it reports back with the entire set of calls.
 // Focus regex works on the package, type and function names. Filtered
 // results will include parent samples from the call graph.
-func (r *Report) Filter(cum bool, focus *regexp.Regexp) []string {
+func (r *report) Filter(cum bool, focus *regexp.Regexp) []string {
 	r.mu.Lock()
 	defer r.mu.Unlock()
 	if r.p == nil {
@@ -70,12 +70,12 @@ func (r *Report) Filter(cum bool, focus *regexp.Regexp) []string {
 	}
 	c := r.p.Copy()
 	c.FilterSamplesByName(focus, nil, nil)
-	rpt := report.NewDefault(c, report.Options{
-		OutputFormat:   report.Text,
+	rpt := goreport.NewDefault(c, goreport.Options{
+		OutputFormat:   goreport.Text,
 		CumSort:        cum,
 		PrintAddresses: true,
 	})
 	buf := bytes.NewBuffer(nil)
-	report.Generate(buf, rpt, nil)
+	goreport.Generate(buf, rpt, nil)
 	return strings.Split(buf.String(), "\n")
 }
