@@ -18,9 +18,7 @@ github.com/rakyll/gom/http package. The http package will register several handl
 import _ "github.com/rakyll/gom/http"
 
 // If your application is not already running an http server, you need to start one.
-go func() {
-	log.Println(http.ListenAndServe("localhost:6060", nil))
-}()
+log.Println(http.ListenAndServe("localhost:6060", nil))
 
 ```
 
