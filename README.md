@@ -37,7 +37,7 @@ $ gom
 
 ## Goals
 
-* Building a lightweight tool that works well with live profiles is a necessity. Over the time, I recognized that a lot of people around me delayed to use the existing pprof tools because it's a tedious experience.
+* Building a lightweight tool that works well with runtime profiles is a necessity. Over the time, I recognized that a lot of people around me delayed to use the existing pprof tools because it's a tedious experience.
 * gom has no ambition to provide the features at the granularity of the features of the command line tools. Users should feel free to fallback to `go tool pprof` if they need more sophisticated features.
 * Allow users to filter, hide and ignore by symbol names.
 * Increase the awareness around profiling tools and packages in Go.
@@ -45,5 +45,5 @@ $ gom
 
 ### Minor Goals
 * gom should provide interfaces to let the users to export their profile data and continue to work with the go tool.
-* allow users to work with their custom user profiles.
+* Allow users to work with their custom user profiles.
 * Make it easier to generate pprof graphical output.
