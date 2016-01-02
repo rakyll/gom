@@ -21,13 +21,14 @@ import (
 	"io"
 	"os/exec"
 	"regexp"
+	"strings"
 	"sync"
 	"time"
 
-	"github.com/rakyll/gom/internal/pprof/fetch"
-	"github.com/rakyll/gom/internal/pprof/profile"
-	"github.com/rakyll/gom/internal/pprof/report"
-	"github.com/rakyll/gom/internal/pprof/symbolz"
+	"github.com/rakyll/gom/internal/fetch"
+	"github.com/rakyll/gom/internal/profile"
+	"github.com/rakyll/gom/internal/report"
+	"github.com/rakyll/gom/internal/symbolz"
 )
 
 type Report struct {
@@ -39,6 +40,8 @@ type Report struct {
 }
 
 func (r *Report) Inited() bool {
+	r.mu.Lock()
+	defer r.mu.Unlock()
 	return r.p != nil
 }
 
@@ -66,19 +69,22 @@ func (r *Report) Fetch(secs int) error {
 // it reports back with the entire set of calls.
 // Focus regex works on the package, type and function names. Filtered
 // results will include parent samples from the call graph.
-func (r *Report) Filter(w io.Writer, cum bool, focus *regexp.Regexp) {
-	// TODO(jbd): Support ignore and hide regex parameters.
+func (r *Report) Filter(cum bool, focus *regexp.Regexp) []string {
+	r.mu.Lock()
+	defer r.mu.Unlock()
 	if r.p == nil {
-		return
+		return nil
 	}
 	c := r.p.Copy()
 	c.FilterSamplesByName(focus, nil, nil)
 	rpt := report.NewDefault(c, report.Options{
-		OutputFormat:   report.JSON,
+		OutputFormat:   report.Text,
 		CumSort:        cum,
 		PrintAddresses: true,
 	})
-	report.Generate(w, rpt, nil)
+	buf := bytes.NewBuffer(nil)
+	report.Generate(buf, rpt, nil)
+	return strings.Split(buf.String(), "\n")
 }
 
 func (r *Report) Draw(w io.Writer, cum bool, focus *regexp.Regexp) error {

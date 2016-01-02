@@ -19,8 +19,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/rakyll/gom/internal/pprof/plugin"
-	"github.com/rakyll/gom/internal/pprof/profile"
+	"github.com/rakyll/gom/internal/plugin"
+	"github.com/rakyll/gom/internal/profile"
 )
 
 // Generate generates a report as directed by the Report.
@@ -53,6 +53,46 @@ func Generate(w io.Writer, rpt *Report, obj plugin.ObjTool) error {
 		return printCallgrind(w, rpt)
 	}
 	return fmt.Errorf("unexpected output format")
+}
+
+type reportEl struct {
+	Name           string  `json:"name"`
+	Flat           string  `json:"flat"`
+	FlatPercent    string  `json:"flat_perc"`
+	FlatSumPercent string  `json:"flatsum_perc"`
+	Cum            string  `json:"cum"`
+	CumPercent     string  `json:"cum_perc"`
+	Score          float64 `json:"score"`
+}
+
+func printJSON(w io.Writer, rpt *Report) error {
+	g, err := newGraph(rpt)
+	if err != nil {
+		return err
+	}
+	g.preprocess(rpt)
+	var flatSum int64
+	var l = make([]*reportEl, len(g.ns))
+	for i, n := range g.ns {
+		name, flat, cum := n.info.prettyName(), n.flat, n.cum
+		flatSum += flat
+		l[i] = &reportEl{
+			Name:           name,
+			Flat:           rpt.formatValue(flat),
+			FlatPercent:    percentage(flat, rpt.total),
+			FlatSumPercent: percentage(flatSum, rpt.total),
+			Cum:            rpt.formatValue(cum),
+			CumPercent:     percentage(cum, rpt.total),
+		}
+		if rpt.total > 0 {
+			if rpt.options.CumSort {
+				l[i].Score = float64(cum) / float64(rpt.total)
+			} else {
+				l[i].Score = float64(flat) / float64(rpt.total)
+			}
+		}
+	}
+	return json.NewEncoder(w).Encode(l)
 }
 
 // printAssembly prints an annotated assembly listing.
@@ -329,8 +369,8 @@ func printText(w io.Writer, rpt *Report) error {
 		return err
 	}
 
-	g.preprocess(rpt)
-	// fmt.Fprintln(w, strings.Join(legendDetailLabels(rpt, g, origCount, droppedNodes, 0), "\n"))
+	origCount, droppedNodes, _ := g.preprocess(rpt)
+	fmt.Fprintln(w, strings.Join(legendDetailLabels(rpt, g, origCount, droppedNodes, 0), "\n"))
 
 	// fmt.Fprintf(w, "%10s %5s%% %5s%% %10s %5s%%\n",
 	// 	"flat", "flat", "sum", "cum", "cum")
@@ -349,46 +389,6 @@ func printText(w io.Writer, rpt *Report) error {
 			name)
 	}
 	return nil
-}
-
-type reportEl struct {
-	Name           string  `json:"name"`
-	Flat           string  `json:"flat"`
-	FlatPercent    string  `json:"flat_perc"`
-	FlatSumPercent string  `json:"flatsum_perc"`
-	Cum            string  `json:"cum"`
-	CumPercent     string  `json:"cum_perc"`
-	Score          float64 `json:"score"`
-}
-
-func printJSON(w io.Writer, rpt *Report) error {
-	g, err := newGraph(rpt)
-	if err != nil {
-		return err
-	}
-	g.preprocess(rpt)
-	var flatSum int64
-	var l = make([]*reportEl, len(g.ns))
-	for i, n := range g.ns {
-		name, flat, cum := n.info.prettyName(), n.flat, n.cum
-		flatSum += flat
-		l[i] = &reportEl{
-			Name:           name,
-			Flat:           rpt.formatValue(flat),
-			FlatPercent:    percentage(flat, rpt.total),
-			FlatSumPercent: percentage(flatSum, rpt.total),
-			Cum:            rpt.formatValue(cum),
-			CumPercent:     percentage(cum, rpt.total),
-		}
-		if rpt.total > 0 {
-			if rpt.options.CumSort {
-				l[i].Score = float64(cum) / float64(rpt.total)
-			} else {
-				l[i].Score = float64(flat) / float64(rpt.total)
-			}
-		}
-	}
-	return json.NewEncoder(w).Encode(l)
 }
 
 // printCallgrind prints a graph for a profile on callgrind format.
@@ -974,12 +974,12 @@ const (
 	Tags
 	Tree
 	Text
+	JSON
 	Raw
 	Dis
 	List
 	WebList
 	Callgrind
-	JSON
 )
 
 // Options are the formatting and filtering options used to generate a
@@ -1549,7 +1549,7 @@ func memoryLabel(value int64, fromUnit, toUnit string) (v float64, u string, ok 
 	case "megabyte", "mb":
 		value *= 1024 * 1024
 	case "gigabyte", "gb":
-		value *= 1024 * 1024
+		value *= 1024 * 1024 * 1024
 	default:
 		return 0, "", false
 	}
@@ -1575,7 +1575,7 @@ func memoryLabel(value int64, fromUnit, toUnit string) (v float64, u string, ok 
 		output, toUnit = float64(value)/1024, "kB"
 	case "mb", "mbyte", "megabyte":
 		output, toUnit = float64(value)/(1024*1024), "MB"
-	case "gb", "gbyte", "giggabyte":
+	case "gb", "gbyte", "gigabyte":
 		output, toUnit = float64(value)/(1024*1024*1024), "GB"
 	}
 	return output, toUnit, true

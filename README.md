@@ -2,7 +2,7 @@
 
 A visual interface to work with runtime profiling data from Go programs.
 
-![gom screenshot](http://i.imgur.com/0xkaSKL.png)
+![gom screenshot](https://googledrive.com/host/0ByfSjdPVs9MZbkhjeUhMYzRTeEE/gom-screenshot.png)
 
 
 ## Installation
