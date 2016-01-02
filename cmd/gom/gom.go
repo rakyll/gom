@@ -57,7 +57,7 @@ func main() {
 				promptMsg = promptMsg[:l-1]
 			}
 		case "<enter>":
-			// todo
+			handleInput()
 			promptMsg = ""
 		case "<escape>":
 			promptMsg = ""
@@ -169,6 +169,10 @@ func refresh() {
 
 	ui.Body.Align()
 	ui.Render(ui.Body)
+}
+
+func handleInput() {
+	// TODO
 }
 
 func displayMsg(msg string) {
