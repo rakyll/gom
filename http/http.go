@@ -33,17 +33,20 @@ type stats struct {
 
 func init() {
 	// TODO(jbd): enable block profile.
-	http.HandleFunc("/debug/pprofstats", func(w http.ResponseWriter, r *http.Request) {
-		n := &stats{
-			Goroutine: pprof.Lookup("goroutine").Count(),
-			Thread:    pprof.Lookup("threadcreate").Count(),
-			Block:     pprof.Lookup("block").Count(),
-			Timestamp: time.Now().Unix(),
-		}
-		err := json.NewEncoder(w).Encode(n)
-		if err != nil {
-			w.WriteHeader(500)
-			fmt.Fprint(w, err)
-		}
-	})
+	http.HandleFunc("/debug/pprofstats", Stats)
+}
+
+// Stats exposes pprof status counters, includes number of goroutines, threads, blocks
+func Stats(w http.ResponseWriter, r *http.Request) {
+	n := &stats{
+		Goroutine: pprof.Lookup("goroutine").Count(),
+		Thread:    pprof.Lookup("threadcreate").Count(),
+		Block:     pprof.Lookup("block").Count(),
+		Timestamp: time.Now().Unix(),
+	}
+	err := json.NewEncoder(w).Encode(n)
+	if err != nil {
+		w.WriteHeader(500)
+		fmt.Fprint(w, err)
+	}
 }

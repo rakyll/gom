@@ -35,6 +35,8 @@ $ gom
 - ← and → to paginate.
 - :f=\<regex\> filters the profile with the provided regex.
 
+**Note** if you are using [Gorrila Mux router](https://github.com/gorilla/mux) few [additional steps](docs/usage-gorrila-mux.md) are required.
+
 ## Goals
 
 * Building a lightweight tool that works well with runtime profiles is a necessity. Over the time, I recognized that a lot of people around me delayed to use the existing pprof tools because it's a tedious experience.
