@@ -1,8 +1,6 @@
-## Additional steps for users of Gorrila Mux router
+## Additional steps for users of Gorilla Mux router
 
-If you are using [Gorrila Mux router](https://github.com/gorilla/mux) you must register pprof and gom http handlers.
-
-Code sample:
+If you are using [Gorilla Mux router](https://github.com/gorilla/mux) you must register pprof and gom http handlers.
 
 ``` go
 import (
@@ -13,6 +11,8 @@ import (
 func main() {
     r := mux.NewRouter()
 	attachProfiler(r)
+
+    // ...
 }
 
 func attachProfiler(router *mux.Router) {

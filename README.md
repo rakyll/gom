@@ -35,7 +35,7 @@ $ gom
 - ← and → to paginate.
 - :f=\<regex\> filters the profile with the provided regex.
 
-**Note** if you are using [Gorrila Mux router](https://github.com/gorilla/mux) few [additional steps](docs/usage-gorrila-mux.md) are required.
+**Note** if you are using [Gorilla Mux router](https://github.com/gorilla/mux) few [additional steps](docs/usage-gorilla-mux.md) are required.
 
 ## Goals
 
