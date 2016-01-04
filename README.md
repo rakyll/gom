@@ -35,7 +35,26 @@ $ gom
 - ← and → to paginate.
 - :f=\<regex\> filters the profile with the provided regex.
 
-**Note** if you are using [Gorilla Mux router](https://github.com/gorilla/mux) few [additional steps](docs/usage-gorilla-mux.md) are required.
+### Additional installation notes
+
+If you are using custom http.ServeMux you must register profiling http routes to your router instance.
+``` go
+import gomhttp "github.com/rakyll/gom/http"
+
+mux := http.NewServeMux()
+gomhttp.AttachProfiler(mux, false)
+```
+
+If you are using [Gorilla Mux router](https://github.com/gorilla/mux) when calling AttachProfiler adapter is needed.
+``` go
+import (
+    gomhttp "github.com/rakyll/gom/http"
+	"github.com/gorilla/mux"
+)
+
+r := mux.NewRouter()
+gomhttp.AttachProfiler(gomhttp.GorillaMux{r}, false)
+```
 
 ## Goals
 

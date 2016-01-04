@@ -18,10 +18,9 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	httppprof "net/http/pprof"
 	"runtime/pprof"
 	"time"
-
-	_ "net/http/pprof"
 )
 
 type stats struct {
@@ -32,12 +31,37 @@ type stats struct {
 }
 
 func init() {
-	// TODO(jbd): enable block profile.
-	http.HandleFunc("/debug/pprofstats", Stats)
+	AttachProfiler(http.DefaultServeMux, true)
+}
+
+// router
+type router interface {
+	Handle(pattern string, handler http.Handler)
+	HandleFunc(pattern string, handler func(http.ResponseWriter, *http.Request))
+}
+
+// AttachProfiler will register http profiling routes to http router (http.ServeMux like type that satisfy router interface)
+// If you are not using http.DefaultServerMux set pprofRegistrated to false so it's http routes can also be registered.
+func AttachProfiler(r router, pprofRegistrated bool) {
+	r.HandleFunc("/debug/pprofstats", Stats)
+
+	if !pprofRegistrated {
+		r.HandleFunc("/debug/pprof/", httppprof.Index)
+		r.HandleFunc("/debug/pprof/cmdline", httppprof.Cmdline)
+		r.HandleFunc("/debug/pprof/profile", httppprof.Profile)
+		r.HandleFunc("/debug/pprof/symbol", httppprof.Symbol)
+		r.HandleFunc("/debug/pprof/trace", httppprof.Trace)
+
+		r.Handle("/debug/pprof/goroutine", httppprof.Handler("goroutine"))
+		r.Handle("/debug/pprof/heap", httppprof.Handler("heap"))
+		r.Handle("/debug/pprof/threadcreate", httppprof.Handler("threadcreate"))
+		r.Handle("/debug/pprof/block", httppprof.Handler("block"))
+	}
 }
 
 // Stats exposes pprof status counters, includes number of goroutines, threads, blocks
 func Stats(w http.ResponseWriter, r *http.Request) {
+	// TODO(jbd): enable block profile.
 	n := &stats{
 		Goroutine: pprof.Lookup("goroutine").Count(),
 		Thread:    pprof.Lookup("threadcreate").Count(),
