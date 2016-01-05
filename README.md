@@ -42,18 +42,19 @@ If you are using custom http.ServeMux you must register profiling http routes to
 import gomhttp "github.com/rakyll/gom/http"
 
 mux := http.NewServeMux()
-gomhttp.AttachProfiler(mux, false)
+gomhttp.AttachProfiler(mux)
 ```
 
 If you are using [Gorilla Mux router](https://github.com/gorilla/mux) when calling AttachProfiler adapter is needed.
 ``` go
 import (
     gomhttp "github.com/rakyll/gom/http"
+    gommux "github.com/rakyll/gom/http/mux"
 	"github.com/gorilla/mux"
 )
 
 r := mux.NewRouter()
-gomhttp.AttachProfiler(gomhttp.GorillaMux{r}, false)
+gomhttp.AttachProfiler(gommux.GorillaMux{r})
 ```
 
 ## Goals
