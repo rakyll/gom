@@ -188,20 +188,24 @@ func handleInput() {
 	switch promptMsg {
 	case ":c":
 		currentProfile = cpuProfile
+		reportPage = 0
 		loadProfile(false)
 		refresh()
 		return
 	case ":h":
 		currentProfile = heapProfile
+		reportPage = 0
 		loadProfile(false)
 		refresh()
 		return
 	case ":r":
 		loadProfile(true)
+		reportPage = 0
 		refresh()
 		return
 	case ":s":
 		cum = !cum
+		reportPage = 0
 		loadProfile(false)
 		refresh()
 		return
@@ -210,6 +214,7 @@ func handleInput() {
 	if strings.HasPrefix(promptMsg, ":f=") {
 		re := regexp.MustCompile(":f=(.*)")
 		filter = re.FindStringSubmatch(promptMsg)[1]
+		reportPage = 0
 		loadProfile(false)
 		refresh()
 		return
