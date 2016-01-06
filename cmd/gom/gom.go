@@ -54,6 +54,7 @@ func main() {
 		ev := e.Data.(ui.EvtKbd)
 		switch ev.KeyStr {
 		case ":":
+			// TODO(jbd): enable input mode and disable after esc or enter.
 			promptMsg = ":"
 		case "C-8":
 			if l := len(promptMsg); l != 0 {
