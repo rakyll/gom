@@ -35,6 +35,28 @@ $ gom
 - ↓ and ↑ to paginate.
 - :f=\<regex\> filters the profile with the provided regex.
 
+### Additional installation notes
+
+If you are using custom http.ServeMux you must register profiling http routes to your router instance.
+``` go
+import gomhttp "github.com/rakyll/gom/http"
+
+mux := http.NewServeMux()
+gomhttp.AttachProfiler(mux)
+```
+
+If you are using [Gorilla Mux router](https://github.com/gorilla/mux) when calling AttachProfiler adapter is needed.
+``` go
+import (
+    gomhttp "github.com/rakyll/gom/http"
+    gommux "github.com/rakyll/gom/http/mux"
+	"github.com/gorilla/mux"
+)
+
+r := mux.NewRouter()
+gomhttp.AttachProfiler(gommux.GorillaMux{r})
+```
+
 ## Goals
 
 * Building a lightweight tool that works well with runtime profiles is a necessity. Over the time, I recognized that a lot of people around me delayed to use the existing pprof tools because it's a tedious experience.

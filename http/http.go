@@ -18,10 +18,9 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	httppprof "net/http/pprof"
 	"runtime/pprof"
 	"time"
-
-	_ "net/http/pprof"
 )
 
 type stats struct {
@@ -32,18 +31,44 @@ type stats struct {
 }
 
 func init() {
+	http.HandleFunc("/debug/pprofstats", Stats)
+}
+
+// router
+type router interface {
+	Handle(pattern string, handler http.Handler)
+	HandleFunc(pattern string, handler func(http.ResponseWriter, *http.Request))
+}
+
+// AttachProfiler will register http profiling routes to http router (http.ServeMux like type that satisfy router interface).
+// Calling AttachProfiler is needed if you are not using http.DefaultServeMux.
+func AttachProfiler(r router) {
+	r.HandleFunc("/debug/pprofstats", Stats)
+
+	r.HandleFunc("/debug/pprof/", httppprof.Index)
+	r.HandleFunc("/debug/pprof/cmdline", httppprof.Cmdline)
+	r.HandleFunc("/debug/pprof/profile", httppprof.Profile)
+	r.HandleFunc("/debug/pprof/symbol", httppprof.Symbol)
+	r.HandleFunc("/debug/pprof/trace", httppprof.Trace)
+
+	r.Handle("/debug/pprof/goroutine", httppprof.Handler("goroutine"))
+	r.Handle("/debug/pprof/heap", httppprof.Handler("heap"))
+	r.Handle("/debug/pprof/threadcreate", httppprof.Handler("threadcreate"))
+	r.Handle("/debug/pprof/block", httppprof.Handler("block"))
+}
+
+// Stats exposes pprof status counters, includes number of goroutines, threads, blocks
+func Stats(w http.ResponseWriter, r *http.Request) {
 	// TODO(jbd): enable block profile.
-	http.HandleFunc("/debug/pprofstats", func(w http.ResponseWriter, r *http.Request) {
-		n := &stats{
-			Goroutine: pprof.Lookup("goroutine").Count(),
-			Thread:    pprof.Lookup("threadcreate").Count(),
-			Block:     pprof.Lookup("block").Count(),
-			Timestamp: time.Now().Unix(),
-		}
-		err := json.NewEncoder(w).Encode(n)
-		if err != nil {
-			w.WriteHeader(500)
-			fmt.Fprint(w, err)
-		}
-	})
+	n := &stats{
+		Goroutine: pprof.Lookup("goroutine").Count(),
+		Thread:    pprof.Lookup("threadcreate").Count(),
+		Block:     pprof.Lookup("block").Count(),
+		Timestamp: time.Now().Unix(),
+	}
+	err := json.NewEncoder(w).Encode(n)
+	if err != nil {
+		w.WriteHeader(500)
+		fmt.Fprint(w, err)
+	}
 }
