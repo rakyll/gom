@@ -62,12 +62,10 @@ func main() {
 		case "<enter>":
 			handleInput()
 			promptMsg = ""
-		case "<left>":
 		case "<up>":
 			if reportPage > 0 {
 				reportPage--
 			}
-		case "<right>":
 		case "<down>":
 			reportPage++
 		case "<escape>":
@@ -105,7 +103,7 @@ func draw() {
 	prompt.Height = 1
 	prompt.Border = false
 
-	help := ui.NewPar(`:c, :h for profiles; :f to filter; < and > to paginate`)
+	help := ui.NewPar(`:c, :h for profiles; :f to filter; ↓ and ↑ to paginate`)
 	help.Height = 1
 	help.Border = false
 	help.TextBgColor = ui.ColorBlue

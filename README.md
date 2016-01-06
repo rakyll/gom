@@ -32,7 +32,7 @@ $ gom
 - :h loads the heap profile (default profile on launch).
 - :r refreshes the current profile.
 - :s toggles the cumulative sort and resorts the items.
-- ← and → to paginate.
+- ↓ and ↑ to paginate.
 - :f=\<regex\> filters the profile with the provided regex.
 
 ## Goals
