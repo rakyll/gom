@@ -36,8 +36,8 @@ type report struct {
 	secs int
 }
 
-// Fetch fetches the current profile and the symbols from the target program.
-func (r *report) Fetch(force bool, secs int) error {
+// fetch fetches the current profile and the symbols from the target program.
+func (r *report) fetch(force bool, secs int) error {
 	r.mu.Lock()
 	defer r.mu.Unlock()
 	if r.p != nil && !force {
@@ -58,11 +58,11 @@ func (r *report) Fetch(force bool, secs int) error {
 	return nil
 }
 
-// Filter filters the report with a focus regex. If no focus is provided,
+// filter filters the report with a focus regex. If no focus is provided,
 // it reports back with the entire set of calls.
 // Focus regex works on the package, type and function names. Filtered
 // results will include parent samples from the call graph.
-func (r *report) Filter(cum bool, focus *regexp.Regexp) []string {
+func (r *report) filter(cum bool, focus *regexp.Regexp) []string {
 	r.mu.Lock()
 	defer r.mu.Unlock()
 	if r.p == nil {

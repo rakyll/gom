@@ -160,12 +160,12 @@ func loadStats() {
 }
 
 func loadProfile(force bool) {
-	if err := currentProfile.Fetch(force, 0); err != nil {
+	if err := currentProfile.fetch(force, 0); err != nil {
 		displayMsg(err.Error())
 		return
 	}
 	re, _ := regexp.Compile(filter)
-	reportItems = currentProfile.Filter(cum, re)
+	reportItems = currentProfile.filter(cum, re)
 }
 
 func refresh() {
