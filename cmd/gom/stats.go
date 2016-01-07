@@ -28,7 +28,7 @@ type stats struct {
 }
 
 func fetchStats() (s stats, err error) {
-	url := fmt.Sprintf("%s/debug/pprofstats", *target)
+	url := fmt.Sprintf("%s/debug/_gom", *target)
 	resp, err := http.Get(url)
 	if err != nil {
 		return s, err

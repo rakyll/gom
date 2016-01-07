@@ -10,7 +10,6 @@ import (
 	"bytes"
 	"fmt"
 	"io"
-	"net/url"
 	"regexp"
 	"strconv"
 	"strings"
@@ -28,7 +27,7 @@ var (
 // symbolizes all locations based on their addresses, regardless of
 // mapping.
 func Symbolize(source string, syms func(string, string) ([]byte, error), p *profile.Profile) error {
-	if source = symbolz(source, p); source == "" {
+	if source == "" {
 		// If the source is not a recognizable URL, do nothing.
 		return nil
 	}
@@ -92,20 +91,4 @@ func Symbolize(source string, syms func(string, string) ([]byte, error), p *prof
 	}
 
 	return nil
-}
-
-// symbolz returns the corresponding symbolz source for a profile URL.
-func symbolz(source string, p *profile.Profile) string {
-	if url, err := url.Parse(source); err == nil && url.Host != "" {
-		if last := strings.LastIndex(url.Path, "/"); last != -1 {
-			if strings.HasSuffix(url.Path[:last], "pprof") {
-				url.Path = url.Path[:last] + "/symbol"
-			} else {
-				url.Path = url.Path[:last] + "/symbolz"
-			}
-			return url.String()
-		}
-	}
-
-	return ""
 }

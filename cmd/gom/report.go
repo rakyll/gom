@@ -33,25 +33,24 @@ type report struct {
 	p  *profile.Profile
 
 	name string
-	secs int
 }
 
 // fetch fetches the current profile and the symbols from the target program.
-func (r *report) fetch(force bool, secs int) error {
+func (r *report) fetch(force bool, secs time.Duration) error {
 	r.mu.Lock()
 	defer r.mu.Unlock()
 	if r.p != nil && !force {
 		return nil
 	}
 	if secs == 0 {
-		secs = r.secs
+		secs = 60 * time.Second
 	}
-	url := fmt.Sprintf("%s/debug/pprof/%s?seconds=%d", *target, r.name, secs)
-	p, err := fetch.FetchProfile(url, 60*time.Second)
+	url := fmt.Sprintf("%s/debug/_gom?view=profile&name=%s", *target, r.name)
+	p, err := fetch.FetchProfile(url, secs)
 	if err != nil {
 		return err
 	}
-	if err := symbolz.Symbolize(fmt.Sprintf("%s/debug/pprof/symbol", *target), fetch.PostURL, p); err != nil {
+	if err := symbolz.Symbolize(fmt.Sprintf("%s/debug/_gom?view=symbol", *target), fetch.PostURL, p); err != nil {
 		return err
 	}
 	r.p = p

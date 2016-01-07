@@ -21,7 +21,7 @@ import (
 	"runtime/pprof"
 	"time"
 
-	_ "net/http/pprof"
+	httppprof "net/http/pprof"
 )
 
 type stats struct {
@@ -32,16 +32,29 @@ type stats struct {
 }
 
 func init() {
-	http.HandleFunc("/debug/pprofstats", Stats())
+	http.HandleFunc("/debug/_gom", Handler())
 }
 
-// Stats handler returns an http.HandlerFunc that returns stats
+// Handler returns an http.HandlerFunc that returns stats
 // about the number of current goroutines, threads, etc.
-// Stats handler must be accessible through "/debug/pprofstats" route
+// Stats handler must be accessible through the "/debug/pprofstats" route
 // in order for gom to display the stats from the debugged program.
-func Stats() http.HandlerFunc {
+func Handler() http.HandlerFunc {
 	// TODO(jbd): enable block profile.
 	return func(w http.ResponseWriter, r *http.Request) {
+		switch r.URL.Query().Get("view") {
+		case "profile":
+			name := r.URL.Query().Get("name")
+			if name == "profile" {
+				httppprof.Profile(w, r)
+				return
+			}
+			httppprof.Handler(name).ServeHTTP(w, r)
+			return
+		case "symbol":
+			httppprof.Symbol(w, r)
+			return
+		}
 		n := &stats{
 			Goroutine: pprof.Lookup("goroutine").Count(),
 			Thread:    pprof.Lookup("threadcreate").Count(),
