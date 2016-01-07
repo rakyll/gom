@@ -1,4 +1,4 @@
-# gom
+# gom [![GoDoc](https://godoc.org/github.com/rakyll/gom/http?status.svg)](https://godoc.org/github.com/rakyll/gom/http)
 
 A visual interface to work with runtime profiling data from Go programs.
 
