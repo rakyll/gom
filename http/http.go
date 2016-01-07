@@ -39,6 +39,7 @@ func init() {
 // and additional metrics.
 // The handler must be accessible through the "/debug/_gom" route
 // in order for gom to display the stats from the debugged program.
+// See the godoc examples for usage.
 func Handler() http.HandlerFunc {
 	// TODO(jbd): enable block profile.
 	return func(w http.ResponseWriter, r *http.Request) {
