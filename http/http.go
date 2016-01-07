@@ -35,9 +35,9 @@ func init() {
 	http.HandleFunc("/debug/_gom", Handler())
 }
 
-// Handler returns an http.HandlerFunc that returns stats
-// about the number of current goroutines, threads, etc.
-// Stats handler must be accessible through the "/debug/pprofstats" route
+// Handler returns an http.HandlerFunc that returns pprof profiles
+// and additional metrics.
+// The handler must be accessible through the "/debug/_gom" route
 // in order for gom to display the stats from the debugged program.
 func Handler() http.HandlerFunc {
 	// TODO(jbd): enable block profile.
