@@ -12,6 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+// Package main contains a program that helps to visualize performance-related
+// data from Go programs.
+// Read the instructions at https://github.com/rakyll/gom to learn more.
 package main
 
 import (
