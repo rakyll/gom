@@ -12,9 +12,9 @@ import (
 	"strconv"
 	"strings"
 
-	"cmd/pprof/internal/commands"
-	"cmd/pprof/internal/plugin"
-	"cmd/pprof/internal/profile"
+	"github.com/rakyll/gom/internal/commands"
+	"github.com/rakyll/gom/internal/plugin"
+	"github.com/rakyll/gom/internal/profile"
 )
 
 var profileFunctionNames = []string{}

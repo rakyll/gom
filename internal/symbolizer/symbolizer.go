@@ -13,8 +13,8 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/rakyll/gom/plugin"
-	"github.com/rakyll/gom/profile"
+	"github.com/rakyll/gom/internal/plugin"
+	"github.com/rakyll/gom/internal/profile"
 )
 
 // Symbolize adds symbol and line number information to all locations
