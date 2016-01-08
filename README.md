@@ -17,9 +17,23 @@ github.com/rakyll/gom/http package. The http package will register several handl
 ``` go
 import _ "github.com/rakyll/gom/http"
 
-// If your application is not already running an http server, you need to start one.
+// If your application is not already running an http server,
+// you need to start one.
 log.Println(http.ListenAndServe("localhost:6060", nil))
 
+```
+
+If your HTTP server is not going to handle the http.DefaultServeMux,
+you need to manually register the gom handler to respond to "/debug/_gom".
+
+For example, gorilla/mux users can use the snippet below:
+
+``` go
+import "gomhttp "github.com/rakyll/gom/http"
+
+mux := http.NewServeMux()
+mux.HandleFunc("/debug/_gom", gomhttp.Handler())
+log.Println(http.ListenAndServe("localhost:6060", nil))
 ```
 
 Now, you are ready to launch gom.
