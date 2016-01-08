@@ -193,12 +193,14 @@ func handleInput() {
 	case ":c":
 		currentProfile = cpuProfile
 		reportPage = 0
+		filter = ""
 		loadProfile(false)
 		refresh()
 		return
 	case ":h":
 		currentProfile = heapProfile
 		reportPage = 0
+		filter = ""
 		loadProfile(false)
 		refresh()
 		return
