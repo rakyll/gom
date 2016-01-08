@@ -16,10 +16,10 @@ import (
 	"strings"
 	"time"
 
-	"github.com/rakyll/gom/plugin"
-	"github.com/rakyll/gom/report"
-	"github.com/rakyll/gom/svg"
-	"github.com/rakyll/gom/tempfile"
+	"github.com/rakyll/gom/internal/plugin"
+	"github.com/rakyll/gom/internal/report"
+	"github.com/rakyll/gom/internal/svg"
+	"github.com/rakyll/gom/internal/tempfile"
 )
 
 // Commands describes the commands accepted by pprof.

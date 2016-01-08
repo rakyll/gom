@@ -21,11 +21,11 @@ import (
 	"sync"
 	"time"
 
-	"github.com/rakyll/gom/commands"
-	"github.com/rakyll/gom/plugin"
-	"github.com/rakyll/gom/profile"
-	"github.com/rakyll/gom/report"
-	"github.com/rakyll/gom/tempfile"
+	"github.com/rakyll/gom/internal/commands"
+	"github.com/rakyll/gom/internal/plugin"
+	"github.com/rakyll/gom/internal/profile"
+	"github.com/rakyll/gom/internal/report"
+	"github.com/rakyll/gom/internal/tempfile"
 )
 
 // PProf acquires a profile, and symbolizes it using a profile
