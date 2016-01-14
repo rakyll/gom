@@ -195,26 +195,18 @@ func handleInput() {
 		reportPage = 0
 		filter = ""
 		loadProfile(false)
-		refresh()
-		return
 	case ":h":
 		currentProfile = heapProfile
 		reportPage = 0
 		filter = ""
 		loadProfile(false)
-		refresh()
-		return
 	case ":r":
-		loadProfile(true)
 		reportPage = 0
-		refresh()
-		return
+		loadProfile(true)
 	case ":s":
 		cum = !cum
 		reportPage = 0
 		loadProfile(false)
-		refresh()
-		return
 	}
 	// handle filtering
 	if strings.HasPrefix(promptMsg, ":f=") {
@@ -222,9 +214,8 @@ func handleInput() {
 		filter = re.FindStringSubmatch(promptMsg)[1]
 		reportPage = 0
 		loadProfile(false)
-		refresh()
-		return
 	}
+	refresh()
 }
 
 func displayMsg(msg string) {
