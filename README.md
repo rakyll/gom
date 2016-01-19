@@ -29,7 +29,7 @@ you need to manually register the gom handler to respond to "/debug/_gom".
 For example, gorilla/mux users can use the snippet below:
 
 ``` go
-import "gomhttp "github.com/rakyll/gom/http"
+import gomhttp "github.com/rakyll/gom/http"
 
 mux := http.NewServeMux()
 mux.HandleFunc("/debug/_gom", gomhttp.Handler())
